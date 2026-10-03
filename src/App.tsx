@@ -1,9 +1,6 @@
-import { useState, useRef } from 'react'
-import type { VideoFileItem } from '@/core/types/video.types'
-import type { CompressionOptions, CompressionProgress, CompressionResult } from '@/core/types/compression.types'
+import { useState } from 'react'
+import type { CompressionOptions } from '@/core/types/compression.types'
 import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
-import { extractVideoMetadata } from '@/core/engine/video_metadata_extractor'
-import { compressVideo } from '@/core/engine/video_compressor.engine'
 import { Header } from '@/components/layout/header.component'
 import { Footer } from '@/components/layout/footer.component'
 import { Dropzone } from '@/features/upload/dropzone.component'
@@ -15,6 +12,8 @@ import { ProgressCard } from '@/features/processing/progress_card.component'
 import { CompressionMetrics } from '@/features/results/compression_metrics.component'
 import { VideoComparison } from '@/features/player/video_comparison.component'
 import { ExportAction } from '@/features/results/export_action.component'
+import { useVideoQueue } from '@/features/studio/hooks/use_video_queue.hook'
+import { useCompressionJob } from '@/features/studio/hooks/use_compression_job.hook'
 
 const DEFAULT_OPTIONS: CompressionOptions = {
   mode: 'preset',
@@ -33,94 +32,23 @@ const DEFAULT_OPTIONS: CompressionOptions = {
 
 export function App() {
   const [codecs] = useState(() => detectSupportedCodecs())
-  const [items, setItems] = useState<VideoFileItem[]>([])
-  const [activeId, setActiveId] = useState<string | null>(null)
   const [options, setOptions] = useState<CompressionOptions>(() => ({
     ...DEFAULT_OPTIONS,
     format: codecs.recommendedFormat,
   }))
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [progress, setProgress] = useState<CompressionProgress | null>(null)
-  const [activeResult, setActiveResult] = useState<CompressionResult | null>(null)
-  const abortCtrlRef = useRef<AbortController | null>(null)
 
-  const handleFilesSelected = async (files: File[]) => {
-    const newItems: VideoFileItem[] = files.map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      file,
-      metadata: null,
-      status: 'analyzing',
-    }))
+  const { items, activeId, activeItem, setItems, setActiveId, handleFilesSelected, removeItem } =
+    useVideoQueue()
 
-    setItems((prev) => [...prev, ...newItems])
-    if (!activeId && newItems.length > 0) setActiveId(newItems[0].id)
-
-    for (const item of newItems) {
-      try {
-        const meta = await extractVideoMetadata(item.file)
-        setItems((prev) =>
-          prev.map((i) => (i.id === item.id ? { ...i, metadata: meta, status: 'ready' } : i))
-        )
-      } catch (err) {
-        setItems((prev) =>
-          prev.map((i) =>
-            i.id === item.id
-              ? { ...i, status: 'error', errorMessage: err instanceof Error ? err.message : 'Error' }
-              : i
-          )
-        )
-      }
-    }
-  }
-
-  const activeItem = items.find((i) => i.id === activeId) ?? null
-
-  const handleStartCompress = async (targetItem: VideoFileItem = activeItem!) => {
-    if (!targetItem?.metadata) return
-    setIsProcessing(true)
-    setProgress(null)
-    setActiveResult(null)
-    abortCtrlRef.current = new AbortController()
-
-    try {
-      const res = await compressVideo(
-        targetItem.file,
-        targetItem.metadata,
-        options,
-        setProgress,
-        abortCtrlRef.current.signal
-      )
-      setActiveResult(res)
-      setItems((prev) =>
-        prev.map((i) =>
-          i.id === targetItem.id
-            ? { ...i, status: 'completed', resultBlob: res.blob, resultSize: res.compressedSize, resultUrl: res.url }
-            : i
-        )
-      )
-    } catch {
-      setItems((prev) =>
-        prev.map((i) => (i.id === targetItem.id ? { ...i, status: 'ready' } : i))
-      )
-    } finally {
-      setIsProcessing(false)
-      abortCtrlRef.current = null
-    }
-  }
-
-  const handleProcessAll = async () => {
-    for (const item of items) {
-      if (item.metadata && item.status !== 'completed') {
-        setActiveId(item.id)
-        await handleStartCompress(item)
-      }
-    }
-  }
-
-  const handleCancel = () => {
-    abortCtrlRef.current?.abort()
-    setIsProcessing(false)
-  }
+  const {
+    isProcessing,
+    progress,
+    activeResult,
+    setActiveResult,
+    handleStartCompress,
+    handleProcessAll,
+    handleCancel,
+  } = useCompressionJob(setItems, setActiveId)
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100">
@@ -146,9 +74,7 @@ export function App() {
                 metadata={activeItem.metadata}
                 disabled={isProcessing}
                 onRemove={() => {
-                  const filtered = items.filter((i) => i.id !== activeItem.id)
-                  setItems(filtered)
-                  setActiveId(filtered[0]?.id ?? null)
+                  removeItem(activeItem.id)
                   setActiveResult(null)
                 }}
               />
@@ -179,12 +105,8 @@ export function App() {
                     setActiveResult(null)
                   }
                 }}
-                onRemoveItem={(id) => {
-                  const filtered = items.filter((i) => i.id !== id)
-                  setItems(filtered)
-                  if (activeId === id) setActiveId(filtered[0]?.id ?? null)
-                }}
-                onProcessAll={handleProcessAll}
+                onRemoveItem={removeItem}
+                onProcessAll={() => handleProcessAll(items, options)}
               />
             )}
 
@@ -227,7 +149,7 @@ export function App() {
                 supportsMp4={codecs.supportsMp4}
                 isProcessing={isProcessing}
                 onChangeOptions={setOptions}
-                onStartCompress={() => handleStartCompress(activeItem)}
+                onStartCompress={() => handleStartCompress(activeItem, options)}
               />
             )}
           </div>
