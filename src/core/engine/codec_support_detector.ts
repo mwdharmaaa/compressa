@@ -34,17 +34,25 @@ export function detectSupportedCodecs(): SupportedCodecs {
 
   let mp4MimeType: string | null = null
   for (const candidate of MP4_CANDIDATES) {
-    if (MediaRecorder.isTypeSupported(candidate)) {
-      mp4MimeType = candidate
-      break
+    try {
+      if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(candidate)) {
+        mp4MimeType = candidate
+        break
+      }
+    } catch {
+      // Continue next candidate
     }
   }
 
   let webmMimeType: string | null = null
   for (const candidate of WEBM_CANDIDATES) {
-    if (MediaRecorder.isTypeSupported(candidate)) {
-      webmMimeType = candidate
-      break
+    try {
+      if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(candidate)) {
+        webmMimeType = candidate
+        break
+      }
+    } catch {
+      // Continue next candidate
     }
   }
 

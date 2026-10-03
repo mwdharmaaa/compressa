@@ -10,5 +10,5 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-echo "[*] Starting Vite dev server..."
-npm run dev -- --host
+echo "[*] Starting Vite dev server and opening browser..."
+npm run dev -- --open --host

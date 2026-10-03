@@ -2,4 +2,5 @@
 echo ==============================================================
 echo   Launching Compressa Dev Server (@mwdhrmaaa)
 echo ==============================================================
-npm.cmd run dev -- --host
+echo [*] Starting server and opening browser at http://localhost:3000
+npm.cmd run dev -- --open --host

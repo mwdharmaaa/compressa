@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" style="background-color: #09090b; color: #f4f4f5;">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -7,9 +7,39 @@
     <meta name="theme-color" content="#09090b" />
     <meta name="description" content="High-Performance In-Browser Video Compressor. 100% private, hardware-accelerated, zero-upload compression studio." />
     <title>Compressa - Video Compressor & Optimizer Studio</title>
+    <style>
+      html, body {
+        background-color: #09090b;
+        color: #f4f4f5;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+    </style>
   </head>
-  <body class="bg-zinc-950 text-zinc-100 antialiased selection:bg-zinc-800 selection:text-zinc-50 min-h-screen">
-    <div id="root"></div>
+  <body class="bg-zinc-950 text-zinc-100 antialiased selection:bg-zinc-800 selection:text-zinc-50 min-h-screen" style="background-color: #09090b; color: #f4f4f5;">
+    <div id="root">
+      <div id="loader-fallback" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background-color:#09090b;color:#f4f4f5;padding:24px;text-align:center;">
+        <div style="max-width:440px;background:#141419;padding:32px;border-radius:16px;border:1px solid #27272a;">
+          <div style="font-weight:700;font-size:18px;margin-bottom:8px;">Compressa Studio</div>
+          <div id="fallback-desc" style="font-size:13px;color:#a1a1aa;line-height:1.6;margin-bottom:16px;">
+            Initializing in-browser compression engine...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      if (window.location.protocol === 'file:') {
+        window.addEventListener('DOMContentLoaded', function() {
+          var desc = document.getElementById('fallback-desc');
+          if (desc) {
+            desc.innerHTML = 'Direct <code style="background:#27272a;padding:2px 6px;border-radius:4px;color:#60a5fa;">file://</code> opening detected.<br/><br/>Modern web applications require a local HTTP server.<br/>Please double-click <strong style="color:#f4f4f5;">runapp.bat</strong> or execute <code style="background:#27272a;padding:2px 6px;border-radius:4px;color:#60a5fa;">npm run dev</code>, then open <a href="http://localhost:3000" style="color:#60a5fa;text-decoration:underline;">http://localhost:3000</a>.';
+          }
+        });
+      }
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
