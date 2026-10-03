@@ -91,7 +91,7 @@ export function compressVideo(
 
       try {
         recorder = new MediaRecorder(stream, {
-          mimeType: chosenMime,
+          mimeType: chosenMime ?? undefined,
           videoBitsPerSecond: bitrates.videoBitrateBps,
           audioBitsPerSecond: bitrates.audioBitrateBps,
         })
@@ -106,9 +106,9 @@ export function compressVideo(
 
       recorder.onstop = () => {
         tearDown()
-        const finalBlob = new Blob(chunks, { type: chosenMime })
+        const finalBlob = new Blob(chunks, { type: chosenMime ?? undefined })
         const compressedSize = finalBlob.size
-        const { savedBytes, percentReduction } = calculateSavings(metadata.size, compressedSize)
+        const { savedBytes } = calculateSavings(metadata.size, compressedSize)
         const finalUrl = URL.createObjectURL(finalBlob)
 
         resolve({

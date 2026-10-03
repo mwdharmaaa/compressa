@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import type { VideoFileItem, VideoMetadata } from '@/core/types/video.types'
+import type { VideoFileItem } from '@/core/types/video.types'
 import type { CompressionOptions, CompressionProgress, CompressionResult } from '@/core/types/compression.types'
 import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
 import { extractVideoMetadata } from '@/core/engine/video_metadata_extractor'
