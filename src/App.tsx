@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import type { VideoFileItem } from '@/core/types/video.types'
 import type { CompressionOptions, CompressionProgress, CompressionResult } from '@/core/types/compression.types'
 import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
@@ -32,22 +32,17 @@ const DEFAULT_OPTIONS: CompressionOptions = {
 }
 
 export function App() {
+  const [codecs] = useState(() => detectSupportedCodecs())
   const [items, setItems] = useState<VideoFileItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [options, setOptions] = useState<CompressionOptions>(DEFAULT_OPTIONS)
-  const [supportsMp4, setSupportsMp4] = useState(true)
+  const [options, setOptions] = useState<CompressionOptions>(() => ({
+    ...DEFAULT_OPTIONS,
+    format: codecs.recommendedFormat,
+  }))
   const [isProcessing, setIsProcessing] = useState(false)
   const [progress, setProgress] = useState<CompressionProgress | null>(null)
   const [activeResult, setActiveResult] = useState<CompressionResult | null>(null)
   const abortCtrlRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    const codecs = detectSupportedCodecs()
-    setSupportsMp4(codecs.supportsMp4)
-    if (!codecs.supportsMp4) {
-      setOptions((prev) => ({ ...prev, format: 'webm' }))
-    }
-  }, [])
 
   const handleFilesSelected = async (files: File[]) => {
     const newItems: VideoFileItem[] = files.map((file) => ({
@@ -229,7 +224,7 @@ export function App() {
               <CompressionSettings
                 metadata={activeItem.metadata}
                 options={options}
-                supportsMp4={supportsMp4}
+                supportsMp4={codecs.supportsMp4}
                 isProcessing={isProcessing}
                 onChangeOptions={setOptions}
                 onStartCompress={() => handleStartCompress(activeItem)}

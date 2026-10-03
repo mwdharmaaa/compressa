@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Tabs } from '@/components/ui/tabs.component'
 import { Eye } from 'lucide-react'
 
@@ -18,17 +18,16 @@ export function VideoComparison({
   originalResolution,
 }: VideoComparisonProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('compressed')
-  const [origUrl, setOrigUrl] = useState<string>('')
   const compVideoRef = useRef<HTMLVideoElement>(null)
   const origVideoRef = useRef<HTMLVideoElement>(null)
 
+  const origUrl = useMemo(() => URL.createObjectURL(originalFile), [originalFile])
+
   useEffect(() => {
-    const url = URL.createObjectURL(originalFile)
-    setOrigUrl(url)
     return () => {
-      URL.revokeObjectURL(url)
+      URL.revokeObjectURL(origUrl)
     }
-  }, [originalFile])
+  }, [origUrl])
 
   const tabItems: { id: ViewMode; label: string }[] = [
     { id: 'compressed', label: 'Compressed Output' },
