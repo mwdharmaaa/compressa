@@ -58,7 +58,7 @@ export function CompressionSettings({
               value={options.targetSizeMb ?? 15}
               onChange={(val) => onChangeOptions((prev) => ({ ...prev, targetSizeMb: val }))}
               min={1}
-              max={200}
+              max={500}
               step={1}
               unit=" MB"
               description="Automatically computes required video bitrate to meet target limit"

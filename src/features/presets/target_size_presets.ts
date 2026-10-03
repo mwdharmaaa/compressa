@@ -41,4 +41,12 @@ export const TARGET_SIZE_PRESETS: TargetSizePreset[] = [
     description: 'Fits standard 25 MB mail server raw ceiling after base64 overhead',
     badge: '20 MB',
   },
+  {
+    id: 'hd_100mb',
+    label: 'Near-Lossless HD',
+    category: 'custom',
+    targetSizeMb: 100,
+    description: 'High-bitrate compression targeting around 100 MB with pristine visual fidelity',
+    badge: '100 MB',
+  },
 ]
