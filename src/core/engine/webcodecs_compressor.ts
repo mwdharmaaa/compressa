@@ -54,8 +54,24 @@ export async function compressVideoWithWebCodecs(
     formats: ALL_FORMATS,
   })
 
+  const primaryAudio = await input.getPrimaryAudioTrack()
+  const hasAudio = primaryAudio !== null
+
   let outputFormat: OutputFormat = options.format
-  if (outputFormat === 'mp4') {
+
+  if (hasAudio && options.audioOption === 'keep') {
+    const sourceAudioCodec = await primaryAudio.getCodec()
+    // When audio is AAC and output is WebM, switch to MP4 so AAC can be copied 1:1 without transcoding
+    if (sourceAudioCodec === 'aac' && outputFormat === 'webm') {
+      const supportsAvc = await canEncodeVideo('avc', {
+        width: scaled.width,
+        height: scaled.height,
+      })
+      if (supportsAvc) {
+        outputFormat = 'mp4'
+      }
+    }
+  } else if (outputFormat === 'mp4') {
     const supportsAvc = await canEncodeVideo('avc', {
       width: scaled.width,
       height: scaled.height,
@@ -72,9 +88,6 @@ export async function compressVideoWithWebCodecs(
     target,
   })
 
-  const primaryAudio = await input.getPrimaryAudioTrack()
-  const hasAudio = primaryAudio !== null
-
   let audioConfig = undefined
   if (options.audioOption === 'mute' || !hasAudio) {
     audioConfig = { discard: true }
@@ -90,6 +103,10 @@ export async function compressVideoWithWebCodecs(
   const conversion = await Conversion.init({
     input,
     output,
+    copy: {
+      mode: 'preferred',
+      shiftTolerance: Infinity,
+    },
     video: {
       width: scaled.width,
       height: scaled.height,
@@ -107,6 +124,11 @@ export async function compressVideoWithWebCodecs(
   if (!conversion.isValid) {
     const reasons = conversion.discardedTracks.map((t) => `${t.track.type}: ${t.reason}`).join(', ')
     throw new Error(`Incompatible format configuration: ${reasons || 'Unsupported tracks'}`)
+  }
+
+  const discardedAudio = conversion.discardedTracks.find((t) => t.track.type === 'audio')
+  if (hasAudio && options.audioOption !== 'mute' && discardedAudio) {
+    throw new Error(`Audio track could not be preserved: ${discardedAudio.reason}`)
   }
 
   const startTimeReal = performance.now()

@@ -15,8 +15,8 @@ export function AudioControl({
   onChangeBitrate,
 }: AudioControlProps) {
   const options: { id: AudioOption; label: string; icon: typeof Volume2; desc: string }[] = [
-    { id: 'keep', label: 'Original', icon: Volume2, desc: 'High quality (128 kbps)' },
-    { id: 'compress', label: 'Compressed', icon: Music, desc: 'Optimized voice/music (64 kbps)' },
+    { id: 'keep', label: 'Original', icon: Volume2, desc: 'Original audio untouched (100% Passthrough)' },
+    { id: 'compress', label: 'Compressed', icon: Music, desc: 'Optimized voice/music' },
     { id: 'mute', label: 'Strip Audio', icon: VolumeX, desc: 'Silent video (Maximum saving)' },
   ]
 
@@ -48,17 +48,17 @@ export function AudioControl({
         })}
       </div>
 
-      {option === 'keep' && (
+      {option === 'compress' && (
         <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] text-zinc-400">Audio Bitrate</span>
+          <span className="text-[11px] text-zinc-400">Target Audio Bitrate</span>
           <select
             value={bitrateKbps}
             onChange={(e) => onChangeBitrate(Number(e.target.value))}
             className="text-xs bg-zinc-850 border border-zinc-700/80 rounded px-2 py-1 text-zinc-200 focus:outline-none"
           >
-            <option value={96}>96 kbps</option>
+            <option value={64}>64 kbps (Voice / Low)</option>
+            <option value={96}>96 kbps (Balanced)</option>
             <option value={128}>128 kbps (Standard)</option>
-            <option value={192}>192 kbps (Studio)</option>
           </select>
         </div>
       )}

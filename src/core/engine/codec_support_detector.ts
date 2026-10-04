@@ -22,6 +22,21 @@ const WEBM_CANDIDATES = [
 ]
 
 export function detectSupportedCodecs(): SupportedCodecs {
+  const hasWebCodecs =
+    typeof window !== 'undefined' &&
+    'VideoEncoder' in window &&
+    'VideoDecoder' in window
+
+  if (hasWebCodecs) {
+    return {
+      supportsMp4: true,
+      supportsWebm: true,
+      recommendedFormat: 'mp4',
+      mp4MimeType: 'video/mp4',
+      webmMimeType: 'video/webm',
+    }
+  }
+
   if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') {
     return {
       supportsMp4: false,
