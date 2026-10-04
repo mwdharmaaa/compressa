@@ -19,16 +19,11 @@ export function useCompressionJob(
     setActiveResult(null)
     abortCtrlRef.current = new AbortController()
 
-    const resolvedEnd =
-      options.timeRange.end > 0 && options.timeRange.end <= targetItem.metadata.duration
-        ? options.timeRange.end
-        : targetItem.metadata.duration
-    const resolvedStart = Math.max(0, Math.min(options.timeRange.start, resolvedEnd - 0.1))
     const resolvedOptions: CompressionOptions = {
       ...options,
       timeRange: {
-        start: resolvedStart,
-        end: resolvedEnd,
+        start: 0,
+        end: targetItem.metadata.duration,
       },
     }
 

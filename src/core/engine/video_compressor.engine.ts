@@ -5,7 +5,6 @@ import { calculateBitrates } from '@/core/utils/bitrate_calculator'
 import { calculateSavings } from '@/core/utils/file_size_formatter'
 import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
 import { setupAudioRouting } from '@/core/engine/audio_routing'
-import { fixWebmDuration } from '@/core/engine/webm_duration_fixer'
 
 export function compressVideo(
   file: File,
@@ -19,17 +18,19 @@ export function compressVideo(
       return reject(new DOMException('Compression aborted', 'AbortError'))
     }
 
-    const endClip =
-      options.timeRange.end > 0 && options.timeRange.end <= metadata.duration
-        ? options.timeRange.end
-        : metadata.duration
-    const startClip = Math.max(0, Math.min(options.timeRange.start, Math.max(0, endClip - 0.1)))
-    const clipDuration = Math.max(0.1, endClip - startClip)
+    // Video duration is strictly 100% preserved from source video
+    const totalDuration = Math.max(0.1, metadata.duration)
 
-    const scaled = calculateScaledResolution(metadata.width, metadata.height, options.resolutionPreset, options.customScale)
+    const scaled = calculateScaledResolution(
+      metadata.width,
+      metadata.height,
+      options.resolutionPreset,
+      options.customScale
+    )
+
     const bitrates = calculateBitrates({
       mode: options.mode,
-      durationSeconds: clipDuration,
+      durationSeconds: totalDuration,
       targetSizeMb: options.targetSizeMb,
       qualityCrf: options.qualityCrf,
       manualVideoBitrateKbps: options.manualVideoBitrateKbps,
@@ -64,16 +65,12 @@ export function compressVideo(
 
     let recorder: MediaRecorder | null = null
     let animFrameId: number | null = null
-    let rvfcId: number | null = null
     let audioCleanup: () => void = () => {}
     const chunks: Blob[] = []
     const startTimeReal = performance.now()
 
     const tearDown = () => {
       if (animFrameId) cancelAnimationFrame(animFrameId)
-      if (rvfcId !== null && 'cancelVideoFrameCallback' in video) {
-        (video as unknown as { cancelVideoFrameCallback: (id: number) => void }).cancelVideoFrameCallback(rvfcId)
-      }
       audioCleanup()
       video.pause()
       video.removeAttribute('src')
@@ -81,24 +78,18 @@ export function compressVideo(
       URL.revokeObjectURL(objectUrl)
     }
 
-    signal?.addEventListener('abort', () => {
-      tearDown()
-      if (recorder && recorder.state !== 'inactive') recorder.stop()
-      reject(new DOMException('Compression aborted', 'AbortError'))
-    }, { once: true })
+    signal?.addEventListener(
+      'abort',
+      () => {
+        tearDown()
+        if (recorder && recorder.state !== 'inactive') recorder.stop()
+        reject(new DOMException('Compression aborted', 'AbortError'))
+      },
+      { once: true }
+    )
 
-    video.onloadedmetadata = () => {
-      video.currentTime = startClip
-    }
-
-    video.onended = () => {
-      if (recorder && recorder.state !== 'inactive') {
-        recorder.stop()
-      }
-    }
-
-    video.onseeked = () => {
-      if (recorder) return // already started
+    const startRecording = () => {
+      if (recorder) return
 
       const { audioTrack, cleanup } = setupAudioRouting(video, options.audioOption === 'mute')
       audioCleanup = cleanup
@@ -121,12 +112,10 @@ export function compressVideo(
         if (e.data && e.data.size > 0) chunks.push(e.data)
       }
 
-      recorder.onstop = async () => {
+      recorder.onstop = () => {
         tearDown()
-        const rawBlob = new Blob(chunks, { type: chosenMime ?? undefined })
-        const finalBlob = chosenMime?.includes('webm')
-          ? await fixWebmDuration(rawBlob, clipDuration)
-          : rawBlob
+        // Use clean uncorrupted raw container Blob directly
+        const finalBlob = new Blob(chunks, { type: chosenMime ?? undefined })
         const compressedSize = finalBlob.size
         const { savedBytes } = calculateSavings(metadata.size, compressedSize)
         const finalUrl = URL.createObjectURL(finalBlob)
@@ -138,7 +127,7 @@ export function compressVideo(
           compressedSize,
           compressionRatio: Number((metadata.size / Math.max(1, compressedSize)).toFixed(1)),
           savedBytes,
-          duration: clipDuration,
+          duration: totalDuration,
           width: scaled.width,
           height: scaled.height,
           format: outputFormat,
@@ -146,9 +135,23 @@ export function compressVideo(
       }
 
       recorder.start(1000)
-      // Playback rate MUST remain 1.0 to preserve exact video duration
+      // Exactly 1:1 real-time playback - duration is 100% untouched
       video.playbackRate = 1.0
       video.play().catch(reject)
+
+      const stopRecorder = () => {
+        if (recorder && recorder.state !== 'inactive') {
+          recorder.stop()
+        }
+      }
+
+      video.onended = stopRecorder
+
+      video.ontimeupdate = () => {
+        if (video.currentTime >= totalDuration) {
+          stopRecorder()
+        }
+      }
 
       const renderLoop = () => {
         if (signal?.aborted) return
@@ -156,38 +159,42 @@ export function compressVideo(
         if (ctx) ctx.drawImage(video, 0, 0, scaled.width, scaled.height)
 
         const currentPos = video.currentTime
-        const processedSec = Math.max(0, currentPos - startClip)
-        const progressFrac = Math.min(1.0, processedSec / clipDuration)
+        const progressFrac = Math.min(1.0, currentPos / totalDuration)
         const elapsedReal = (performance.now() - startTimeReal) / 1000
-        const currentSpeed = elapsedReal > 0 ? processedSec / elapsedReal : 1.0
-        const remSec = currentSpeed > 0 ? (clipDuration - processedSec) / currentSpeed : 0
+        const currentSpeed = elapsedReal > 0 ? currentPos / elapsedReal : 1.0
+        const remSec = currentSpeed > 0 ? (totalDuration - currentPos) / currentSpeed : 0
 
         onProgress({
           percentage: Number((progressFrac * 100).toFixed(1)),
-          processedSeconds: Number(processedSec.toFixed(1)),
-          totalSeconds: clipDuration,
+          processedSeconds: Number(currentPos.toFixed(1)),
+          totalSeconds: totalDuration,
           currentFps: options.targetFps || 30,
           estimatedRemainingSeconds: Math.max(0, Math.round(remSec)),
         })
 
-        if (currentPos >= endClip || video.ended) {
-          if (recorder && recorder.state !== 'inactive') {
-            recorder.stop()
-          }
+        if (currentPos >= totalDuration || video.ended) {
+          stopRecorder()
           return
         }
 
-        if ('requestVideoFrameCallback' in video) {
-          rvfcId = (video as unknown as { requestVideoFrameCallback: (cb: () => void) => number }).requestVideoFrameCallback(renderLoop)
-        } else {
-          animFrameId = requestAnimationFrame(renderLoop)
-        }
+        animFrameId = requestAnimationFrame(renderLoop)
       }
 
-      if ('requestVideoFrameCallback' in video) {
-        rvfcId = (video as unknown as { requestVideoFrameCallback: (cb: () => void) => number }).requestVideoFrameCallback(renderLoop)
-      } else {
-        animFrameId = requestAnimationFrame(renderLoop)
+      animFrameId = requestAnimationFrame(renderLoop)
+    }
+
+    video.onloadedmetadata = () => {
+      video.currentTime = 0
+    }
+
+    video.onseeked = () => {
+      startRecording()
+    }
+
+    // Fallback if seeked is not fired because currentTime was already 0
+    video.oncanplay = () => {
+      if (video.currentTime === 0) {
+        startRecording()
       }
     }
 

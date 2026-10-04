@@ -18,7 +18,7 @@ export interface CompressionOptions {
   audioBitrateKbps: number
   format: OutputFormat
   speedMultiplier?: number
-  timeRange: {
+  timeRange?: {
     start: number
     end: number
   }

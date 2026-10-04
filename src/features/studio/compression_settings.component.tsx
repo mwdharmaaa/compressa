@@ -7,7 +7,6 @@ import { PresetCard } from '@/features/presets/preset_card.component'
 import { ResolutionControl } from '@/features/controls/resolution_control.component'
 import { FpsControl } from '@/features/controls/fps_control.component'
 import { AudioControl } from '@/features/controls/audio_control.component'
-import { TrimmerControl } from '@/features/controls/trimmer_control.component'
 import { FormatControl } from '@/features/controls/format_control.component'
 import { Slider } from '@/components/ui/slider.component'
 import { Button } from '@/components/ui/button.component'
@@ -143,15 +142,6 @@ export function CompressionSettings({
           onChangeBitrate={(b) => onChangeOptions((prev) => ({ ...prev, audioBitrateKbps: b }))}
         />
       </div>
-
-      <TrimmerControl
-        duration={metadata.duration}
-        startTime={options.timeRange.start}
-        endTime={options.timeRange.end}
-        onChangeRange={(start, end) =>
-          onChangeOptions((prev) => ({ ...prev, timeRange: { start, end } }))
-        }
-      />
 
       <FormatControl
         format={options.format}
