@@ -2,19 +2,19 @@ import type { TargetSizePreset } from '@/core/types/preset.types'
 
 export const TARGET_SIZE_PRESETS: TargetSizePreset[] = [
   {
-    id: 'discord_8mb',
-    label: 'Discord Free',
-    category: 'discord',
-    targetSizeMb: 8,
-    description: 'Compresses to fit under Discord 8 MB free upload cap',
-    badge: '8 MB',
+    id: 'balanced_50mb',
+    label: 'Balanced HD',
+    category: 'custom',
+    targetSizeMb: 50,
+    description: 'Sensible balance: pristine 1080p video, untouched audio, and healthy file savings',
+    badge: '50 MB',
   },
   {
     id: 'discord_25mb',
-    label: 'Discord Standard',
+    label: 'Discord & Telegram HD',
     category: 'discord',
     targetSizeMb: 25,
-    description: 'Optimized for Discord 25 MB channel upload limit',
+    description: 'High definition sharing under standard 25 MB channel limits',
     badge: '25 MB',
   },
   {
@@ -27,26 +27,18 @@ export const TARGET_SIZE_PRESETS: TargetSizePreset[] = [
   },
   {
     id: 'email_10mb',
-    label: 'Email Attachment',
+    label: 'Compact Share',
     category: 'email',
     targetSizeMb: 10,
-    description: 'Universally deliverable across Gmail, Outlook, and Apple Mail',
+    description: 'Fits email attachment limits with auto-adjusted bitrate',
     badge: '10 MB',
-  },
-  {
-    id: 'email_20mb',
-    label: 'Email Large',
-    category: 'email',
-    targetSizeMb: 20,
-    description: 'Fits standard 25 MB mail server raw ceiling after base64 overhead',
-    badge: '20 MB',
   },
   {
     id: 'hd_100mb',
     label: 'Near-Lossless HD',
     category: 'custom',
     targetSizeMb: 100,
-    description: 'High-bitrate compression targeting around 100 MB with pristine visual fidelity',
+    description: 'High-bitrate compression for large files with zero noticeable loss',
     badge: '100 MB',
   },
 ]

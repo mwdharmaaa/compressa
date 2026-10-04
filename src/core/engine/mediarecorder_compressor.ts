@@ -55,6 +55,16 @@ export function compressVideoWithMediaRecorder(
     video.preload = 'auto'
     video.playsInline = true
     video.muted = options.audioOption === 'mute'
+    video.style.position = 'fixed'
+    video.style.top = '-9999px'
+    video.style.left = '-9999px'
+    video.style.width = '1px'
+    video.style.height = '1px'
+    video.style.opacity = '0'
+    video.style.pointerEvents = 'none'
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.appendChild(video)
+    }
 
     const canvas = document.createElement('canvas')
     canvas.width = scaled.width
@@ -73,6 +83,9 @@ export function compressVideoWithMediaRecorder(
       video.pause()
       video.removeAttribute('src')
       video.load()
+      if (video.parentNode) {
+        video.parentNode.removeChild(video)
+      }
       URL.revokeObjectURL(objectUrl)
     }
 
