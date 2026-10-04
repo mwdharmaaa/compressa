@@ -137,9 +137,7 @@ export function CompressionSettings({
         />
         <AudioControl
           option={options.audioOption}
-          bitrateKbps={options.audioBitrateKbps}
           onChangeOption={(opt) => onChangeOptions((prev) => ({ ...prev, audioOption: opt }))}
-          onChangeBitrate={(b) => onChangeOptions((prev) => ({ ...prev, audioBitrateKbps: b }))}
         />
       </div>
 

@@ -8,7 +8,7 @@ export interface BitrateCalculationInput {
   qualityCrf?: number
   manualVideoBitrateKbps?: number
   audioOption: AudioOption
-  audioBitrateKbps: number
+  audioBitrateKbps?: number
   targetWidth?: number
   targetHeight?: number
   targetFps?: number
@@ -42,8 +42,6 @@ export function calculateBitrates(input: BitrateCalculationInput): BitrateCalcul
   const audioBitrateBps =
     input.audioOption === 'mute'
       ? 0
-      : input.audioOption === 'compress'
-      ? Math.max(96_000, (input.audioBitrateKbps || 128) * 1000)
       : Math.max(128_000, (input.audioBitrateKbps || 192) * 1000)
 
   let videoBitrateBps = 6_000_000

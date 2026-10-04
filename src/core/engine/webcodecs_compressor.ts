@@ -61,15 +61,17 @@ export async function compressVideoWithWebCodecs(
 
   if (hasAudio && options.audioOption === 'keep') {
     const sourceAudioCodec = await primaryAudio.getCodec()
-    // Align container format with source audio codec so packets can be copied 1:1 losslessly
+    // Align container format with source audio codec so packets can be copied 1:1 losslessly without re-encoding
     if (sourceAudioCodec === 'opus') {
-      outputFormat = 'webm'
-    } else if (sourceAudioCodec === 'aac') {
+      outputFormat = options.format === 'mp4' ? 'mp4' : 'webm'
+    } else {
+      // AAC, MP3, AC3, FLAC require MP4 container to preserve packets losslessly
       outputFormat = 'mp4'
     }
   }
 
-  if (outputFormat === 'mp4') {
+  // Only fall back to WebM if audio is muted or Opus-based, because WebM strictly rejects AAC audio
+  if (outputFormat === 'mp4' && (!hasAudio || options.audioOption === 'mute')) {
     const supportsAvc = await canEncodeVideo('avc', {
       width: scaled.width,
       height: scaled.height,
@@ -86,21 +88,13 @@ export async function compressVideoWithWebCodecs(
     target,
   })
 
-  let audioConfig = undefined
-  if (options.audioOption === 'mute' || !hasAudio) {
-    audioConfig = { discard: true }
-  } else if (options.audioOption === 'compress') {
-    audioConfig = {
-      quality: new Quality({
-        bitrate: Math.max(96_000, bitrates.audioBitrateBps),
-      }),
-      forceTranscode: true,
-    }
-  }
+  // Audio stream is 100% untouched passthrough unless explicitly muted by user
+  const audioConfig = options.audioOption === 'mute' || !hasAudio ? { discard: true } : undefined
 
   const conversion = await Conversion.init({
     input,
     output,
+    tracks: 'primary',
     copy: {
       mode: 'preferred',
       shiftTolerance: Infinity,

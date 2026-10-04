@@ -54,8 +54,7 @@ describe('Bitrate Calculator', () => {
       mode: 'preset',
       durationSeconds: 10,
       targetSizeMb: 10,
-      audioOption: 'compress',
-      audioBitrateKbps: 64,
+      audioOption: 'keep',
     })
     expect(res.estimatedSizeMb).toBeLessThanOrEqual(10.2)
     expect(res.videoBitrateBps).toBeGreaterThan(150_000)

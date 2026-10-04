@@ -4,7 +4,7 @@ export type ResolutionPreset = 'original' | '1080p' | '720p' | '480p' | '360p' |
 
 export type OutputFormat = 'mp4' | 'webm'
 
-export type AudioOption = 'keep' | 'compress' | 'mute'
+export type AudioOption = 'keep' | 'mute'
 
 export interface CompressionOptions {
   mode: CompressionMode
@@ -15,7 +15,7 @@ export interface CompressionOptions {
   qualityCrf: number
   manualVideoBitrateKbps: number
   audioOption: AudioOption
-  audioBitrateKbps: number
+  audioBitrateKbps?: number
   format: OutputFormat
   speedMultiplier?: number
   timeRange?: {
