@@ -14,13 +14,13 @@ export function HeroShowcase() {
     },
     {
       icon: Sliders,
-      title: 'Target Size & CRF Modes',
-      desc: 'Target exact file boundaries for Discord, WhatsApp, and Email, or fine-tune quality with CRF and bitrate sliders.',
+      title: 'Resolution-First Adaptive Sizing',
+      desc: 'Select 1080p, 720p, 480p, or 360p and watch file sizes adapt dynamically with 100% duration integrity.',
     },
     {
       icon: Layers,
-      title: 'Batch Multi-Queue',
-      desc: 'Queue multiple video files, batch process in sequence, and export individual clips or a single ZIP archive.',
+      title: 'Installable PWA App',
+      desc: 'Install directly on Desktop (Windows/macOS) or Mobile (Android/iOS) with standalone launch and offline readiness.',
     },
   ]
 

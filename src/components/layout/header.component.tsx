@@ -1,4 +1,5 @@
 import { Shield, Sparkles } from 'lucide-react'
+import { InstallAppButton } from '@/components/layout/install_app_button.component'
 
 export function Header() {
   return (
@@ -34,6 +35,8 @@ export function Header() {
               Hardware Accelerated
             </span>
           </div>
+
+          <InstallAppButton />
 
           <a
             href="https://github.com/mwdharmaaa/compressa"
