@@ -19,8 +19,11 @@ export function compressVideo(
       return reject(new DOMException('Compression aborted', 'AbortError'))
     }
 
-    const startClip = Math.max(0, options.timeRange.start)
-    const endClip = Math.min(metadata.duration, options.timeRange.end > 0 ? options.timeRange.end : metadata.duration)
+    const endClip =
+      options.timeRange.end > 0 && options.timeRange.end <= metadata.duration
+        ? options.timeRange.end
+        : metadata.duration
+    const startClip = Math.max(0, Math.min(options.timeRange.start, Math.max(0, endClip - 0.1)))
     const clipDuration = Math.max(0.1, endClip - startClip)
 
     const scaled = calculateScaledResolution(metadata.width, metadata.height, options.resolutionPreset, options.customScale)

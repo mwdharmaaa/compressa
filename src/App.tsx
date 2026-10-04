@@ -144,7 +144,16 @@ export function App() {
             {!isProcessing && !activeResult && activeItem?.metadata && (
               <CompressionSettings
                 metadata={activeItem.metadata}
-                options={options}
+                options={{
+                  ...options,
+                  timeRange: {
+                    start: options.timeRange.start,
+                    end:
+                      options.timeRange.end > 0 && options.timeRange.end <= activeItem.metadata.duration
+                        ? options.timeRange.end
+                        : activeItem.metadata.duration,
+                  },
+                }}
                 supportsMp4={codecs.supportsMp4}
                 isProcessing={isProcessing}
                 onChangeOptions={setOptions}
