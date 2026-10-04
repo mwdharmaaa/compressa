@@ -1,5 +1,5 @@
 import type { CompressionMode } from '@/core/types/compression.types'
-import { Target, Sliders, Cpu } from 'lucide-react'
+import { Monitor, Target, Sliders, Cpu } from 'lucide-react'
 
 export interface ModeSelectorProps {
   mode: CompressionMode
@@ -7,12 +7,18 @@ export interface ModeSelectorProps {
 }
 
 export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
-  const modes: { id: CompressionMode; label: string; icon: typeof Target; desc: string }[] = [
+  const modes: { id: CompressionMode; label: string; icon: typeof Monitor; desc: string }[] = [
+    {
+      id: 'resolution',
+      label: 'By Resolution',
+      icon: Monitor,
+      desc: 'Smart size adapted to 1080p, 720p, 480p, 360p',
+    },
     {
       id: 'preset',
       label: 'Target File Size',
       icon: Target,
-      desc: 'Set an exact file limit (Discord, Email, WhatsApp)',
+      desc: 'Set exact MB limit (Discord, Email, WhatsApp)',
     },
     {
       id: 'quality',
@@ -29,7 +35,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
       {modes.map((item) => {
         const isSelected = mode === item.id
         const Icon = item.icon

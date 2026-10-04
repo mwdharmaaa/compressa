@@ -1,6 +1,7 @@
 import type { CompressionOptions } from '@/core/types/compression.types'
 import type { VideoMetadata } from '@/core/types/video.types'
 import { ModeSelector } from '@/features/controls/mode_selector.component'
+import { ResolutionPresetSelector } from '@/features/controls/resolution_preset_selector.component'
 import { TARGET_SIZE_PRESETS } from '@/features/presets/target_size_presets'
 import { PresetCard } from '@/features/presets/preset_card.component'
 import { ResolutionControl } from '@/features/controls/resolution_control.component'
@@ -35,6 +36,19 @@ export function CompressionSettings({
         mode={options.mode}
         onChange={(m) => onChangeOptions((prev) => ({ ...prev, mode: m }))}
       />
+
+      {options.mode === 'resolution' && (
+        <ResolutionPresetSelector
+          originalWidth={metadata.width}
+          originalHeight={metadata.height}
+          duration={metadata.duration}
+          originalSize={metadata.size}
+          preset={options.resolutionPreset}
+          customScale={options.customScale}
+          onSelectPreset={(p) => onChangeOptions((prev) => ({ ...prev, resolutionPreset: p }))}
+          onChangeCustomScale={(s) => onChangeOptions((prev) => ({ ...prev, customScale: s }))}
+        />
+      )}
 
       {options.mode === 'preset' && (
         <div className="flex flex-col gap-2.5">
@@ -106,14 +120,16 @@ export function CompressionSettings({
         </div>
       )}
 
-      <ResolutionControl
-        originalWidth={metadata.width}
-        originalHeight={metadata.height}
-        preset={options.resolutionPreset}
-        customScale={options.customScale}
-        onChangePreset={(p) => onChangeOptions((prev) => ({ ...prev, resolutionPreset: p }))}
-        onChangeCustomScale={(s) => onChangeOptions((prev) => ({ ...prev, customScale: s }))}
-      />
+      {options.mode !== 'resolution' && (
+        <ResolutionControl
+          originalWidth={metadata.width}
+          originalHeight={metadata.height}
+          preset={options.resolutionPreset}
+          customScale={options.customScale}
+          onChangePreset={(p) => onChangeOptions((prev) => ({ ...prev, resolutionPreset: p }))}
+          onChangeCustomScale={(s) => onChangeOptions((prev) => ({ ...prev, customScale: s }))}
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FpsControl
@@ -140,9 +156,7 @@ export function CompressionSettings({
       <FormatControl
         format={options.format}
         supportsMp4={supportsMp4}
-        speedMultiplier={options.speedMultiplier}
         onChangeFormat={(fmt) => onChangeOptions((prev) => ({ ...prev, format: fmt }))}
-        onChangeSpeed={(spd) => onChangeOptions((prev) => ({ ...prev, speedMultiplier: spd }))}
       />
 
       <Button

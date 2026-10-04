@@ -1,28 +1,17 @@
 import type { OutputFormat } from '@/core/types/compression.types'
-import { Zap } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 
 export interface FormatControlProps {
   format: OutputFormat
   supportsMp4: boolean
-  speedMultiplier: number
   onChangeFormat: (format: OutputFormat) => void
-  onChangeSpeed: (speed: number) => void
 }
 
 export function FormatControl({
   format,
   supportsMp4,
-  speedMultiplier,
   onChangeFormat,
-  onChangeSpeed,
 }: FormatControlProps) {
-  const speeds = [
-    { value: 1.0, label: '1× (Normal)' },
-    { value: 1.5, label: '1.5×' },
-    { value: 2.0, label: '2× (Fast)' },
-    { value: 3.0, label: '3× (Turbo)' },
-  ]
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div className="flex flex-col gap-2">
@@ -57,31 +46,14 @@ export function FormatControl({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-300">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>Encoding Speed</span>
-          </div>
-          <span className="text-[11px] text-zinc-400">Hardware playback rate</span>
+      <div className="flex flex-col justify-center gap-1.5 p-3 rounded-xl bg-zinc-950/60 border border-zinc-800">
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-400">
+          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>Duration Integrity Guaranteed</span>
         </div>
-
-        <div className="grid grid-cols-4 gap-1.5">
-          {speeds.map((s) => (
-            <button
-              key={s.value}
-              type="button"
-              onClick={() => onChangeSpeed(s.value)}
-              className={`py-2 text-xs font-medium rounded-lg border transition-all cursor-pointer text-center ${
-                speedMultiplier === s.value
-                  ? 'bg-zinc-800 text-zinc-100 border-zinc-600 shadow-sm'
-                  : 'bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:bg-zinc-850 hover:text-zinc-200'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+        <p className="text-[11px] text-zinc-400 leading-snug">
+          1:1 native clock synchronization. Video duration is fully preserved without time compression or truncation.
+        </p>
       </div>
     </div>
   )

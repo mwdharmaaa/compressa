@@ -5,6 +5,7 @@ import { calculateBitrates } from '@/core/utils/bitrate_calculator'
 import { calculateSavings } from '@/core/utils/file_size_formatter'
 import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
 import { setupAudioRouting } from '@/core/engine/audio_routing'
+import { fixWebmDuration } from '@/core/engine/webm_duration_fixer'
 
 export function compressVideo(
   file: File,
@@ -31,6 +32,9 @@ export function compressVideo(
       manualVideoBitrateKbps: options.manualVideoBitrateKbps,
       audioOption: options.audioOption,
       audioBitrateKbps: options.audioBitrateKbps,
+      targetWidth: scaled.width,
+      targetHeight: scaled.height,
+      resolutionPreset: options.resolutionPreset,
     })
 
     const codecs = detectSupportedCodecs()
@@ -57,12 +61,16 @@ export function compressVideo(
 
     let recorder: MediaRecorder | null = null
     let animFrameId: number | null = null
+    let rvfcId: number | null = null
     let audioCleanup: () => void = () => {}
     const chunks: Blob[] = []
     const startTimeReal = performance.now()
 
     const tearDown = () => {
       if (animFrameId) cancelAnimationFrame(animFrameId)
+      if (rvfcId !== null && 'cancelVideoFrameCallback' in video) {
+        (video as unknown as { cancelVideoFrameCallback: (id: number) => void }).cancelVideoFrameCallback(rvfcId)
+      }
       audioCleanup()
       video.pause()
       video.removeAttribute('src')
@@ -78,6 +86,12 @@ export function compressVideo(
 
     video.onloadedmetadata = () => {
       video.currentTime = startClip
+    }
+
+    video.onended = () => {
+      if (recorder && recorder.state !== 'inactive') {
+        recorder.stop()
+      }
     }
 
     video.onseeked = () => {
@@ -104,9 +118,12 @@ export function compressVideo(
         if (e.data && e.data.size > 0) chunks.push(e.data)
       }
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         tearDown()
-        const finalBlob = new Blob(chunks, { type: chosenMime ?? undefined })
+        const rawBlob = new Blob(chunks, { type: chosenMime ?? undefined })
+        const finalBlob = chosenMime?.includes('webm')
+          ? await fixWebmDuration(rawBlob, clipDuration)
+          : rawBlob
         const compressedSize = finalBlob.size
         const { savedBytes } = calculateSavings(metadata.size, compressedSize)
         const finalUrl = URL.createObjectURL(finalBlob)
@@ -126,7 +143,8 @@ export function compressVideo(
       }
 
       recorder.start(1000)
-      video.playbackRate = Math.max(0.5, Math.min(3.0, options.speedMultiplier || 1.0))
+      // Playback rate MUST remain 1.0 to preserve exact video duration
+      video.playbackRate = 1.0
       video.play().catch(reject)
 
       const renderLoop = () => {
@@ -156,10 +174,18 @@ export function compressVideo(
           return
         }
 
-        animFrameId = requestAnimationFrame(renderLoop)
+        if ('requestVideoFrameCallback' in video) {
+          rvfcId = (video as unknown as { requestVideoFrameCallback: (cb: () => void) => number }).requestVideoFrameCallback(renderLoop)
+        } else {
+          animFrameId = requestAnimationFrame(renderLoop)
+        }
       }
 
-      animFrameId = requestAnimationFrame(renderLoop)
+      if ('requestVideoFrameCallback' in video) {
+        rvfcId = (video as unknown as { requestVideoFrameCallback: (cb: () => void) => number }).requestVideoFrameCallback(renderLoop)
+      } else {
+        animFrameId = requestAnimationFrame(renderLoop)
+      }
     }
 
     video.onerror = () => {

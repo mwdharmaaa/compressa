@@ -1,4 +1,4 @@
-export type CompressionMode = 'preset' | 'quality' | 'manual'
+export type CompressionMode = 'resolution' | 'preset' | 'quality' | 'manual'
 
 export type ResolutionPreset = 'original' | '1080p' | '720p' | '480p' | '360p' | 'custom'
 
@@ -17,7 +17,7 @@ export interface CompressionOptions {
   audioOption: AudioOption
   audioBitrateKbps: number
   format: OutputFormat
-  speedMultiplier: number
+  speedMultiplier?: number
   timeRange: {
     start: number
     end: number

@@ -16,9 +16,9 @@ import { useVideoQueue } from '@/features/studio/hooks/use_video_queue.hook'
 import { useCompressionJob } from '@/features/studio/hooks/use_compression_job.hook'
 
 const DEFAULT_OPTIONS: CompressionOptions = {
-  mode: 'preset',
+  mode: 'resolution',
   targetSizeMb: 16,
-  resolutionPreset: 'original',
+  resolutionPreset: '720p',
   customScale: 0.75,
   targetFps: 0,
   qualityCrf: 28,
@@ -26,7 +26,6 @@ const DEFAULT_OPTIONS: CompressionOptions = {
   audioOption: 'keep',
   audioBitrateKbps: 128,
   format: 'mp4',
-  speedMultiplier: 1.5,
   timeRange: { start: 0, end: 0 },
 }
 
