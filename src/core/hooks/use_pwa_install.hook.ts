@@ -13,15 +13,18 @@ function checkIsStandalone(): boolean {
   )
 }
 
-function checkIsIos(): boolean {
-  if (typeof window === 'undefined') return false
-  return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
+function checkPlatform(): 'ios' | 'android' | 'desktop' {
+  if (typeof window === 'undefined') return 'desktop'
+  const ua = window.navigator.userAgent.toLowerCase()
+  if (/iphone|ipad|ipod/.test(ua)) return 'ios'
+  if (/android/.test(ua)) return 'android'
+  return 'desktop'
 }
 
 export function usePwaInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState<boolean>(checkIsStandalone)
-  const [isIos] = useState<boolean>(checkIsIos)
+  const [platform] = useState<'ios' | 'android' | 'desktop'>(checkPlatform)
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
@@ -63,10 +66,10 @@ export function usePwaInstall() {
   }
 
   return {
-    isInstallable: Boolean(deferredPrompt) || (isIos && !isInstalled),
+    isInstallable: !isInstalled,
     hasPrompt: Boolean(deferredPrompt),
     isInstalled,
-    isIos,
+    platform,
     promptInstall,
   }
 }

@@ -12,7 +12,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => {
+        return Promise.allSettled(
+          PRECACHE_URLS.map((url) => cache.add(url).catch(() => {}))
+        )
+      })
       .then(() => self.skipWaiting())
   )
 })

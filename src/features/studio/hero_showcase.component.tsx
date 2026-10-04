@@ -1,4 +1,4 @@
-import { Shield, Zap, Layers, Sliders } from 'lucide-react'
+import { Shield, Zap, Download, Sliders } from 'lucide-react'
 
 export function HeroShowcase() {
   const features = [
@@ -18,7 +18,7 @@ export function HeroShowcase() {
       desc: 'Select 1080p, 720p, 480p, or 360p and watch file sizes adapt dynamically with 100% duration integrity.',
     },
     {
-      icon: Layers,
+      icon: Download,
       title: 'Installable PWA App',
       desc: 'Install directly on Desktop (Windows/macOS) or Mobile (Android/iOS) with standalone launch and offline readiness.',
     },
