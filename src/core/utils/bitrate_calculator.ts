@@ -33,7 +33,7 @@ export interface ResolutionEstimateItem {
   percentSavings: number
 }
 
-const MIN_VIDEO_BITRATE_BPS = 180_000 // 180 kbps
+const MIN_VIDEO_BITRATE_BPS = 800_000 // 800 kbps minimum
 const MAX_VIDEO_BITRATE_BPS = 25_000_000 // 25 Mbps
 
 export function calculateBitrates(input: BitrateCalculationInput): BitrateCalculationResult {
@@ -43,10 +43,10 @@ export function calculateBitrates(input: BitrateCalculationInput): BitrateCalcul
     input.audioOption === 'mute'
       ? 0
       : input.audioOption === 'compress'
-      ? 64_000
-      : Math.max(32_000, (input.audioBitrateKbps || 128) * 1000)
+      ? Math.max(96_000, (input.audioBitrateKbps || 128) * 1000)
+      : Math.max(128_000, (input.audioBitrateKbps || 192) * 1000)
 
-  let videoBitrateBps = 1_400_000
+  let videoBitrateBps = 6_000_000
 
   if (input.mode === 'preset' && input.targetSizeMb && input.targetSizeMb > 0) {
     // 5% margin for container metadata overhead
@@ -64,21 +64,27 @@ export function calculateBitrates(input: BitrateCalculationInput): BitrateCalcul
     )
   } else if (input.mode === 'quality') {
     // Quality CRF Mode (CRF 18-36: lower is higher quality)
-    const crf = input.qualityCrf ?? 28
-    const baseBitrate = 4_500_000 * Math.pow(0.5, (crf - 18) / 6)
+    const crf = input.qualityCrf ?? 23
+    const baseBitrate = 7_000_000 * Math.pow(0.5, (crf - 22) / 6)
     videoBitrateBps = Math.min(
       MAX_VIDEO_BITRATE_BPS,
       Math.max(MIN_VIDEO_BITRATE_BPS, Math.round(baseBitrate))
     )
   } else {
-    // 'resolution' mode: Bitrate scales with pixel dimensions
+    // 'resolution' mode: High-fidelity calibrated bitrates
     const width = input.targetWidth ?? 1280
     const height = input.targetHeight ?? 720
-    const fps = input.targetFps || 30
+    const fps = Math.max(24, input.targetFps || 30)
     const pixelCount = width * height
 
-    // Bits-per-pixel formula calibrated for crisp web streaming (0.05 bpp)
-    const calculated = Math.round(pixelCount * fps * 0.05)
+    let bpp = 0.11
+    if (pixelCount >= 1920 * 1080) {
+      bpp = 0.10
+    } else if (pixelCount <= 854 * 480) {
+      bpp = 0.14
+    }
+
+    const calculated = Math.round(pixelCount * fps * bpp)
     videoBitrateBps = Math.min(
       MAX_VIDEO_BITRATE_BPS,
       Math.max(MIN_VIDEO_BITRATE_BPS, calculated)

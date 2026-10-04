@@ -99,7 +99,7 @@ export function compressVideoWithMediaRecorder(
         recorder = new MediaRecorder(stream, {
           mimeType: chosenMime ?? undefined,
           videoBitsPerSecond: bitrates.videoBitrateBps,
-          audioBitsPerSecond: bitrates.audioBitrateBps,
+          audioBitsPerSecond: Math.max(192_000, bitrates.audioBitrateBps),
         })
       } catch (err) {
         tearDown()

@@ -21,6 +21,9 @@ export function setupAudioRouting(
     }
 
     const audioCtx = new AudioContextClass()
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {})
+    }
     const sourceNode = audioCtx.createMediaElementSource(videoElement)
     const destinationNode = audioCtx.createMediaStreamDestination()
 

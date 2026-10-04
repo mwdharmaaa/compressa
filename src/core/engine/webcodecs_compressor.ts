@@ -61,17 +61,15 @@ export async function compressVideoWithWebCodecs(
 
   if (hasAudio && options.audioOption === 'keep') {
     const sourceAudioCodec = await primaryAudio.getCodec()
-    // When audio is AAC and output is WebM, switch to MP4 so AAC can be copied 1:1 without transcoding
-    if (sourceAudioCodec === 'aac' && outputFormat === 'webm') {
-      const supportsAvc = await canEncodeVideo('avc', {
-        width: scaled.width,
-        height: scaled.height,
-      })
-      if (supportsAvc) {
-        outputFormat = 'mp4'
-      }
+    // Align container format with source audio codec so packets can be copied 1:1 losslessly
+    if (sourceAudioCodec === 'opus') {
+      outputFormat = 'webm'
+    } else if (sourceAudioCodec === 'aac') {
+      outputFormat = 'mp4'
     }
-  } else if (outputFormat === 'mp4') {
+  }
+
+  if (outputFormat === 'mp4') {
     const supportsAvc = await canEncodeVideo('avc', {
       width: scaled.width,
       height: scaled.height,
@@ -94,7 +92,7 @@ export async function compressVideoWithWebCodecs(
   } else if (options.audioOption === 'compress') {
     audioConfig = {
       quality: new Quality({
-        bitrate: bitrates.audioBitrateBps,
+        bitrate: Math.max(96_000, bitrates.audioBitrateBps),
       }),
       forceTranscode: true,
     }

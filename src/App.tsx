@@ -17,14 +17,14 @@ import { useCompressionJob } from '@/features/studio/hooks/use_compression_job.h
 
 const DEFAULT_OPTIONS: CompressionOptions = {
   mode: 'resolution',
-  targetSizeMb: 16,
-  resolutionPreset: '720p',
-  customScale: 0.75,
+  targetSizeMb: 50,
+  resolutionPreset: 'original',
+  customScale: 1.0,
   targetFps: 0,
-  qualityCrf: 28,
-  manualVideoBitrateKbps: 1500,
+  qualityCrf: 23,
+  manualVideoBitrateKbps: 6000,
   audioOption: 'keep',
-  audioBitrateKbps: 128,
+  audioBitrateKbps: 192,
   format: 'mp4',
   timeRange: { start: 0, end: 0 },
 }
