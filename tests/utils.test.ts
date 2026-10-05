@@ -3,6 +3,7 @@ import { formatFileSize, calculateSavings } from '@/core/utils/file_size_formatt
 import { formatDuration, formatTimeWithSubseconds } from '@/core/utils/time_formatter'
 import { calculateScaledResolution } from '@/core/utils/resolution_calculator'
 import { calculateBitrates, getResolutionEstimates } from '@/core/utils/bitrate_calculator'
+import { getTargetSizePresets } from '@/features/presets/target_size_presets'
 
 describe('File Size Formatter', () => {
   it('formats byte units properly', () => {
@@ -105,4 +106,33 @@ describe('Bitrate Calculator', () => {
     expect(p720?.estimatedSizeMb).toBeGreaterThan(0)
     expect(p720?.percentSavings).toBeGreaterThan(0)
   })
+
+  it('strictly enforces bitrate ceiling never exceeding original video size', () => {
+    const originalBytes = 20 * 1024 * 1024 // 20 MB
+    const duration = 35.34
+    const estimates = getResolutionEstimates(1280, 720, duration, originalBytes)
+    const originalMb = 20
+
+    for (const est of estimates) {
+      expect(est.estimatedSizeMb).toBeLessThan(originalMb)
+      expect(est.percentSavings).toBeGreaterThan(0)
+    }
+  })
 })
+
+describe('Target Size Presets', () => {
+  it('generates dynamic presets scaled to source size', () => {
+    const presets20Mb = getTargetSizePresets(20 * 1024 * 1024)
+    expect(presets20Mb.length).toBeGreaterThanOrEqual(3)
+
+    for (const preset of presets20Mb) {
+      // Every preset must be strictly less than original size 20 MB
+      expect(preset.targetSizeMb).toBeLessThan(20)
+    }
+
+    const balanced = presets20Mb.find((p) => p.id === 'preset_balanced')
+    expect(balanced?.targetSizeMb).toBe(10)
+  })
+})
+
+

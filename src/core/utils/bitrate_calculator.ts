@@ -13,6 +13,10 @@ export interface BitrateCalculationInput {
   targetHeight?: number
   targetFps?: number
   resolutionPreset?: ResolutionPreset
+  originalSizeBytes?: number
+  originalWidth?: number
+  originalHeight?: number
+  customScale?: number
 }
 
 export interface BitrateCalculationResult {
@@ -33,8 +37,8 @@ export interface ResolutionEstimateItem {
   percentSavings: number
 }
 
-const MIN_VIDEO_BITRATE_BPS = 800_000 // 800 kbps minimum
-const MAX_VIDEO_BITRATE_BPS = 25_000_000 // 25 Mbps
+const MIN_VIDEO_BITRATE_BPS = 100_000 // 100 kbps minimum
+const MAX_VIDEO_BITRATE_BPS = 25_000_000 // 25 Mbps maximum
 
 export function calculateBitrates(input: BitrateCalculationInput): BitrateCalculationResult {
   const duration = Math.max(0.5, input.durationSeconds)
@@ -42,50 +46,87 @@ export function calculateBitrates(input: BitrateCalculationInput): BitrateCalcul
   const audioBitrateBps =
     input.audioOption === 'mute'
       ? 0
-      : Math.max(128_000, (input.audioBitrateKbps || 192) * 1000)
+      : Math.max(96_000, (input.audioBitrateKbps || 128) * 1000)
 
-  let videoBitrateBps = 6_000_000
+  // Determine original bitrate ceiling if original size is provided
+  let originalVideoBitrateBps: number | null = null
+  let maxAllowedVideoBitrate = MAX_VIDEO_BITRATE_BPS
+
+  if (input.originalSizeBytes && input.originalSizeBytes > 0) {
+    const originalTotalBitrateBps = (input.originalSizeBytes * 8) / duration
+    originalVideoBitrateBps = Math.max(MIN_VIDEO_BITRATE_BPS, originalTotalBitrateBps - audioBitrateBps)
+    // Never allow compressed video bitrate to exceed 95% of source
+    maxAllowedVideoBitrate = Math.round(originalVideoBitrateBps * 0.95)
+  }
+
+  let videoBitrateBps = 2_500_000
 
   if (input.mode === 'preset' && input.targetSizeMb && input.targetSizeMb > 0) {
-    // 5% margin for container metadata overhead
+    // 5% margin for container metadata and index tables
     const usableBytes = input.targetSizeMb * 1024 * 1024 * 0.95
     const totalBitrateBps = (usableBytes * 8) / duration
     const calculatedVideoBitrate = totalBitrateBps - audioBitrateBps
     videoBitrateBps = Math.min(
-      MAX_VIDEO_BITRATE_BPS,
+      maxAllowedVideoBitrate,
       Math.max(MIN_VIDEO_BITRATE_BPS, calculatedVideoBitrate)
     )
   } else if (input.mode === 'manual' && input.manualVideoBitrateKbps) {
     videoBitrateBps = Math.min(
-      MAX_VIDEO_BITRATE_BPS,
+      maxAllowedVideoBitrate,
       Math.max(MIN_VIDEO_BITRATE_BPS, input.manualVideoBitrateKbps * 1000)
     )
   } else if (input.mode === 'quality') {
-    // Quality CRF Mode (CRF 18-36: lower is higher quality)
+    // Quality CRF Mode (CRF 18-38: lower is higher quality)
     const crf = input.qualityCrf ?? 23
-    const baseBitrate = 7_000_000 * Math.pow(0.5, (crf - 22) / 6)
+    const baseBitrate = (originalVideoBitrateBps ?? 4_500_000) * Math.pow(0.5, (crf - 22) / 6)
     videoBitrateBps = Math.min(
-      MAX_VIDEO_BITRATE_BPS,
+      maxAllowedVideoBitrate,
       Math.max(MIN_VIDEO_BITRATE_BPS, Math.round(baseBitrate))
     )
   } else {
-    // 'resolution' mode: High-fidelity calibrated bitrates
+    // 'resolution' mode: Proportional to resolution and source bitrate
     const width = input.targetWidth ?? 1280
     const height = input.targetHeight ?? 720
-    const fps = Math.max(24, input.targetFps || 30)
-    const pixelCount = width * height
+    const targetPixels = width * height
+    const originalPixels = (input.originalWidth && input.originalHeight)
+      ? input.originalWidth * input.originalHeight
+      : targetPixels
 
-    let bpp = 0.11
-    if (pixelCount >= 1920 * 1080) {
-      bpp = 0.10
-    } else if (pixelCount <= 854 * 480) {
-      bpp = 0.14
+    if (originalVideoBitrateBps) {
+      // Relative scaling against known source bitrate
+      const pixelRatio = targetPixels / originalPixels
+      let scaleFactor = 0.70
+
+      if (input.resolutionPreset === 'original') {
+        scaleFactor = 0.70
+      } else if (input.resolutionPreset === '1080p') {
+        scaleFactor = Math.min(0.85, Math.max(0.45, pixelRatio * 0.75))
+      } else if (input.resolutionPreset === '720p') {
+        scaleFactor = Math.min(0.65, Math.max(0.30, pixelRatio * 0.70))
+      } else if (input.resolutionPreset === '480p') {
+        scaleFactor = Math.min(0.45, Math.max(0.18, pixelRatio * 0.65))
+      } else if (input.resolutionPreset === '360p') {
+        scaleFactor = Math.min(0.28, Math.max(0.10, pixelRatio * 0.60))
+      } else if (input.customScale) {
+        scaleFactor = Math.min(0.85, Math.pow(input.customScale, 1.4) * 0.75)
+      }
+
+      videoBitrateBps = Math.round(originalVideoBitrateBps * scaleFactor)
+    } else {
+      // Calibrated BPP baseline when original size is unknown
+      const fps = Math.max(24, input.targetFps || 30)
+      let bpp = 0.08
+      if (targetPixels >= 1920 * 1080) {
+        bpp = 0.06
+      } else if (targetPixels <= 854 * 480) {
+        bpp = 0.10
+      }
+      videoBitrateBps = Math.round(targetPixels * fps * bpp)
     }
 
-    const calculated = Math.round(pixelCount * fps * bpp)
     videoBitrateBps = Math.min(
-      MAX_VIDEO_BITRATE_BPS,
-      Math.max(MIN_VIDEO_BITRATE_BPS, calculated)
+      maxAllowedVideoBitrate,
+      Math.max(MIN_VIDEO_BITRATE_BPS, videoBitrateBps)
     )
   }
 
@@ -126,6 +167,10 @@ export function getResolutionEstimates(
       durationSeconds,
       targetWidth: scaled.width,
       targetHeight: scaled.height,
+      resolutionPreset: item.id,
+      originalSizeBytes,
+      originalWidth,
+      originalHeight,
       audioOption,
       audioBitrateKbps,
     })
