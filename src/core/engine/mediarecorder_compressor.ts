@@ -37,6 +37,10 @@ export function compressVideoWithMediaRecorder(
       targetWidth: scaled.width,
       targetHeight: scaled.height,
       resolutionPreset: options.resolutionPreset,
+      originalSizeBytes: metadata.size,
+      originalWidth: metadata.width,
+      originalHeight: metadata.height,
+      customScale: options.customScale,
     })
 
     const codecs = detectSupportedCodecs()
@@ -56,12 +60,13 @@ export function compressVideoWithMediaRecorder(
     video.playsInline = true
     video.muted = options.audioOption === 'mute'
     video.style.position = 'fixed'
-    video.style.top = '-9999px'
-    video.style.left = '-9999px'
-    video.style.width = '1px'
-    video.style.height = '1px'
-    video.style.opacity = '0'
+    video.style.bottom = '0px'
+    video.style.right = '0px'
+    video.style.width = '160px'
+    video.style.height = '90px'
+    video.style.opacity = '0.001'
     video.style.pointerEvents = 'none'
+    video.style.zIndex = '-9999'
     if (typeof document !== 'undefined' && document.body) {
       document.body.appendChild(video)
     }

@@ -47,6 +47,10 @@ export async function compressVideoWithWebCodecs(
     targetWidth: scaled.width,
     targetHeight: scaled.height,
     resolutionPreset: options.resolutionPreset,
+    originalSizeBytes: metadata.size,
+    originalWidth: metadata.width,
+    originalHeight: metadata.height,
+    customScale: options.customScale,
   })
 
   const input = new Input({
@@ -98,6 +102,7 @@ export async function compressVideoWithWebCodecs(
     copy: {
       mode: 'preferred',
       shiftTolerance: Infinity,
+      boundaryTolerance: Infinity,
     },
     video: {
       width: scaled.width,
@@ -116,6 +121,11 @@ export async function compressVideoWithWebCodecs(
   if (!conversion.isValid) {
     const reasons = conversion.discardedTracks.map((t) => `${t.track.type}: ${t.reason}`).join(', ')
     throw new Error(`Incompatible format configuration: ${reasons || 'Unsupported tracks'}`)
+  }
+
+  const discardedVideo = conversion.discardedTracks.find((t) => t.track.type === 'video')
+  if (discardedVideo) {
+    throw new Error(`Video track could not be processed: ${discardedVideo.reason}`)
   }
 
   const discardedAudio = conversion.discardedTracks.find((t) => t.track.type === 'audio')

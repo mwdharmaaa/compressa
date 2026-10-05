@@ -1,4 +1,4 @@
-const CACHE_NAME = 'compressa-v2'
+const CACHE_NAME = 'compressa-v3'
 const PRECACHE_ASSETS = [
   './manifest.webmanifest',
   './favicon.svg',
