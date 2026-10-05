@@ -19,8 +19,15 @@ export function useCompressionJob(
     setActiveResult(null)
     abortCtrlRef.current = new AbortController()
 
+    const originalMb = targetItem.metadata.size / (1024 * 1024)
+    const resolvedTargetSizeMb =
+      !options.targetSizeMb || options.targetSizeMb >= originalMb
+        ? Math.max(1, Math.round(originalMb * 0.5 * 10) / 10)
+        : options.targetSizeMb
+
     const resolvedOptions: CompressionOptions = {
       ...options,
+      targetSizeMb: resolvedTargetSizeMb,
       timeRange: {
         start: 0,
         end: targetItem.metadata.duration,

@@ -17,14 +17,14 @@ import { useCompressionJob } from '@/features/studio/hooks/use_compression_job.h
 
 const DEFAULT_OPTIONS: CompressionOptions = {
   mode: 'resolution',
-  targetSizeMb: 50,
+  targetSizeMb: 15,
   resolutionPreset: 'original',
   customScale: 1.0,
   targetFps: 0,
   qualityCrf: 23,
   manualVideoBitrateKbps: 6000,
   audioOption: 'keep',
-  audioBitrateKbps: 192,
+  audioBitrateKbps: 128,
   format: 'mp4',
   timeRange: { start: 0, end: 0 },
 }
@@ -38,6 +38,7 @@ export function App() {
 
   const { items, activeId, activeItem, setItems, setActiveId, handleFilesSelected, removeItem } =
     useVideoQueue()
+
 
   const {
     isProcessing,

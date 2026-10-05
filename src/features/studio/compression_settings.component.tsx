@@ -2,7 +2,7 @@ import type { CompressionOptions } from '@/core/types/compression.types'
 import type { VideoMetadata } from '@/core/types/video.types'
 import { ModeSelector } from '@/features/controls/mode_selector.component'
 import { ResolutionPresetSelector } from '@/features/controls/resolution_preset_selector.component'
-import { TARGET_SIZE_PRESETS } from '@/features/presets/target_size_presets'
+import { getTargetSizePresets } from '@/features/presets/target_size_presets'
 import { PresetCard } from '@/features/presets/preset_card.component'
 import { ResolutionControl } from '@/features/controls/resolution_control.component'
 import { FpsControl } from '@/features/controls/fps_control.component'
@@ -29,6 +29,11 @@ export function CompressionSettings({
   onChangeOptions,
   onStartCompress,
 }: CompressionSettingsProps) {
+  const targetPresets = getTargetSizePresets(metadata.size)
+  const originalMb = Number((metadata.size / (1024 * 1024)).toFixed(1))
+  const maxCustomMb = Math.max(2, Math.round(originalMb * 0.95))
+  const minCustomMb = Math.max(1, Math.round(originalMb * 0.08))
+
   return (
     <div className="flex flex-col gap-5 p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800">
       <ModeSelector
@@ -51,9 +56,14 @@ export function CompressionSettings({
 
       {options.mode === 'preset' && (
         <div className="flex flex-col gap-2.5">
-          <label className="text-xs font-medium text-zinc-300">Choose Target Size</label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-medium text-zinc-300">Choose Target Size</label>
+            <span className="text-[11px] font-mono text-zinc-400">
+              Source: {originalMb} MB
+            </span>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {TARGET_SIZE_PRESETS.map((p) => (
+            {targetPresets.map((p) => (
               <PresetCard
                 key={p.id}
                 preset={p}
@@ -68,13 +78,13 @@ export function CompressionSettings({
           <div className="pt-2">
             <Slider
               label="Custom Target Size"
-              value={options.targetSizeMb ?? 15}
+              value={Math.min(maxCustomMb, Math.max(minCustomMb, options.targetSizeMb ?? Math.round(originalMb * 0.5)))}
               onChange={(val) => onChangeOptions((prev) => ({ ...prev, targetSizeMb: val }))}
-              min={1}
-              max={500}
+              min={minCustomMb}
+              max={maxCustomMb}
               step={1}
               unit=" MB"
-              description="Automatically computes required video bitrate to meet target limit"
+              description={`Target cap between ${minCustomMb} MB and ${maxCustomMb} MB (< original ${originalMb} MB)`}
             />
           </div>
         </div>
