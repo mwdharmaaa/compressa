@@ -20,6 +20,12 @@ createRoot(container).render(
 
 if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
+    const swUrl = new URL('sw.js', window.location.href).href
+    navigator.serviceWorker
+      .register(swUrl)
+      .then((reg) => {
+        reg.update().catch(() => {})
+      })
+      .catch(() => {})
   })
 }
