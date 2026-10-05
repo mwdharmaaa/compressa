@@ -97,7 +97,7 @@ export async function compressVideoWithWebCodecs(
     tracks: 'primary',
     copy: {
       mode: 'preferred',
-      shiftTolerance: 0,
+      shiftTolerance: Infinity,
     },
     video: {
       width: scaled.width,

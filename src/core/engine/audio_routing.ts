@@ -14,13 +14,37 @@ export function setupAudioRouting(
     }
   }
 
+  // Try native captureStream on HTMLVideoElement first to avoid Web Audio buffer clicks
+  try {
+    const videoWithCapture = videoElement as HTMLVideoElement & {
+      captureStream?: () => MediaStream
+      mozCaptureStream?: () => MediaStream
+    }
+    const nativeStream = videoWithCapture.captureStream?.() ?? videoWithCapture.mozCaptureStream?.()
+    const nativeAudioTrack = nativeStream?.getAudioTracks()[0]
+    if (nativeAudioTrack) {
+      return {
+        audioTrack: nativeAudioTrack,
+        cleanup: () => {
+          try {
+            nativeAudioTrack.stop()
+          } catch {
+            // Safe cleanup
+          }
+        },
+      }
+    }
+  } catch {
+    // Fall back to AudioContext if captureStream is restricted
+  }
+
   try {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     if (!AudioContextClass) {
       return { audioTrack: null, cleanup: () => {} }
     }
 
-    const audioCtx = new AudioContextClass()
+    const audioCtx = new AudioContextClass({ latencyHint: 'playback' })
     if (audioCtx.state === 'suspended') {
       audioCtx.resume().catch(() => {})
     }
