@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { CompressionOptions } from '@/core/types/compression.types'
 import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
 import { Header } from '@/components/layout/header.component'
 import { Footer } from '@/components/layout/footer.component'
@@ -15,7 +14,7 @@ import { ExportAction } from '@/features/results/export_action.component'
 import { useVideoQueue } from '@/features/studio/hooks/use_video_queue.hook'
 import { useCompressionJob } from '@/features/studio/hooks/use_compression_job.hook'
 
-const DEFAULT_OPTIONS: CompressionOptions = {
+const DEFAULT_OPTIONS = {
   mode: 'resolution',
   targetSizeMb: 15,
   resolutionPreset: 'original',
@@ -31,14 +30,13 @@ const DEFAULT_OPTIONS: CompressionOptions = {
 
 export function App() {
   const [codecs] = useState(() => detectSupportedCodecs())
-  const [options, setOptions] = useState<CompressionOptions>(() => ({
+  const [options, setOptions] = useState(() => ({
     ...DEFAULT_OPTIONS,
     format: codecs.recommendedFormat,
   }))
 
   const { items, activeId, activeItem, setItems, setActiveId, handleFilesSelected, removeItem } =
     useVideoQueue()
-
 
   const {
     isProcessing,
@@ -90,15 +88,15 @@ export function App() {
                   const selected = items.find((i) => i.id === id)
                   if (selected?.resultUrl) {
                     setActiveResult({
-                      blob: selected.resultBlob!,
+                      blob: selected.resultBlob,
                       url: selected.resultUrl,
-                      originalSize: selected.metadata!.size,
-                      compressedSize: selected.resultSize!,
-                      compressionRatio: Number((selected.metadata!.size / selected.resultSize!).toFixed(1)),
-                      savedBytes: selected.metadata!.size - selected.resultSize!,
-                      duration: selected.metadata!.duration,
-                      width: selected.metadata!.width,
-                      height: selected.metadata!.height,
+                      originalSize: selected.metadata.size,
+                      compressedSize: selected.resultSize,
+                      compressionRatio: Number((selected.metadata.size / selected.resultSize).toFixed(1)),
+                      savedBytes: selected.metadata.size - selected.resultSize,
+                      duration: selected.metadata.duration,
+                      width: selected.metadata.width,
+                      height: selected.metadata.height,
                       format: options.format,
                     })
                   } else {

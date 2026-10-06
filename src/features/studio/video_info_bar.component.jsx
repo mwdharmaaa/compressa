@@ -1,15 +1,8 @@
-import type { VideoMetadata } from '@/core/types/video.types'
 import { formatFileSize } from '@/core/utils/file_size_formatter'
 import { formatDuration } from '@/core/utils/time_formatter'
 import { Film, Clock, HardDrive, Maximize2, Trash2 } from 'lucide-react'
 
-export interface VideoInfoBarProps {
-  metadata: VideoMetadata
-  onRemove: () => void
-  disabled?: boolean
-}
-
-export function VideoInfoBar({ metadata, onRemove, disabled = false }: VideoInfoBarProps) {
+export function VideoInfoBar({ metadata, onRemove, disabled = false }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-zinc-900/70 border border-zinc-800">
       <div className="flex items-center gap-3 overflow-hidden">

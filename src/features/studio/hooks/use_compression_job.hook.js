@@ -1,18 +1,13 @@
 import { useState, useRef } from 'react'
-import type { VideoFileItem } from '@/core/types/video.types'
-import type { CompressionOptions, CompressionProgress, CompressionResult } from '@/core/types/compression.types'
 import { compressVideo } from '@/core/engine/video_compressor.engine'
 
-export function useCompressionJob(
-  setItems: React.Dispatch<React.SetStateAction<VideoFileItem[]>>,
-  setActiveId: (id: string) => void
-) {
+export function useCompressionJob(setItems, setActiveId) {
   const [isProcessing, setIsProcessing] = useState(false)
-  const [progress, setProgress] = useState<CompressionProgress | null>(null)
-  const [activeResult, setActiveResult] = useState<CompressionResult | null>(null)
-  const abortCtrlRef = useRef<AbortController | null>(null)
+  const [progress, setProgress] = useState(null)
+  const [activeResult, setActiveResult] = useState(null)
+  const abortCtrlRef = useRef(null)
 
-  const handleStartCompress = async (targetItem: VideoFileItem, options: CompressionOptions) => {
+  const handleStartCompress = async (targetItem, options) => {
     if (!targetItem?.metadata) return
     setIsProcessing(true)
     setProgress(null)
@@ -25,7 +20,7 @@ export function useCompressionJob(
         ? Math.max(1, Math.round(originalMb * 0.5 * 10) / 10)
         : options.targetSizeMb
 
-    const resolvedOptions: CompressionOptions = {
+    const resolvedOptions = {
       ...options,
       targetSizeMb: resolvedTargetSizeMb,
       timeRange: {
@@ -60,7 +55,7 @@ export function useCompressionJob(
     }
   }
 
-  const handleProcessAll = async (items: VideoFileItem[], options: CompressionOptions) => {
+  const handleProcessAll = async (items, options) => {
     for (const item of items) {
       if (item.metadata && item.status !== 'completed') {
         setActiveId(item.id)

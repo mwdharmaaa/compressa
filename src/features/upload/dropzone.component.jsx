@@ -1,28 +1,23 @@
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react'
+import { useState, useRef } from 'react'
 import { UploadCloud, ShieldCheck, Film } from 'lucide-react'
 
-export interface DropzoneProps {
-  onFilesSelected: (files: File[]) => void
-  isProcessing?: boolean
-}
-
-export function Dropzone({ onFilesSelected, isProcessing = false }: DropzoneProps) {
+export function Dropzone({ onFilesSelected, isProcessing = false }) {
   const [isDragging, setIsDragging] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef(null)
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e) => {
     e.preventDefault()
     e.stopPropagation()
     if (!isProcessing) setIsDragging(true)
   }
 
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
   }
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
@@ -37,7 +32,7 @@ export function Dropzone({ onFilesSelected, isProcessing = false }: DropzoneProp
     }
   }
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     if (!e.target.files || isProcessing) return
     const selectedFiles = Array.from(e.target.files)
     if (selectedFiles.length > 0) {

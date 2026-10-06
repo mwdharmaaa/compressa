@@ -1,5 +1,3 @@
-import type { CompressionOptions } from '@/core/types/compression.types'
-import type { VideoMetadata } from '@/core/types/video.types'
 import { ModeSelector } from '@/features/controls/mode_selector.component'
 import { ResolutionPresetSelector } from '@/features/controls/resolution_preset_selector.component'
 import { getTargetSizePresets } from '@/features/presets/target_size_presets'
@@ -12,15 +10,6 @@ import { Slider } from '@/components/ui/slider.component'
 import { Button } from '@/components/ui/button.component'
 import { Play } from 'lucide-react'
 
-export interface CompressionSettingsProps {
-  metadata: VideoMetadata
-  options: CompressionOptions
-  supportsMp4: boolean
-  isProcessing: boolean
-  onChangeOptions: (updater: (prev: CompressionOptions) => CompressionOptions) => void
-  onStartCompress: () => void
-}
-
 export function CompressionSettings({
   metadata,
   options,
@@ -28,7 +17,7 @@ export function CompressionSettings({
   isProcessing,
   onChangeOptions,
   onStartCompress,
-}: CompressionSettingsProps) {
+}) {
   const targetPresets = getTargetSizePresets(metadata.size)
   const originalMb = Number((metadata.size / (1024 * 1024)).toFixed(1))
   const maxCustomMb = Math.max(2, Math.round(originalMb * 0.95))

@@ -1,13 +1,12 @@
 import { useState } from 'react'
-import type { VideoFileItem } from '@/core/types/video.types'
 import { extractVideoMetadata } from '@/core/engine/video_metadata_extractor'
 
 export function useVideoQueue() {
-  const [items, setItems] = useState<VideoFileItem[]>([])
-  const [activeId, setActiveId] = useState<string | null>(null)
+  const [items, setItems] = useState([])
+  const [activeId, setActiveId] = useState(null)
 
-  const handleFilesSelected = async (files: File[]) => {
-    const newItems: VideoFileItem[] = files.map((file) => ({
+  const handleFilesSelected = async (files) => {
+    const newItems = files.map((file) => ({
       id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       file,
       metadata: null,
@@ -35,7 +34,7 @@ export function useVideoQueue() {
     }
   }
 
-  const removeItem = (id: string) => {
+  const removeItem = (id) => {
     const filtered = items.filter((i) => i.id !== id)
     setItems(filtered)
     if (activeId === id) setActiveId(filtered[0]?.id ?? null)
