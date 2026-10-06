@@ -1,13 +1,4 @@
-import type { ReactNode } from 'react'
-
-export interface BadgeProps {
-  children: ReactNode
-  variant?: 'neutral' | 'blue' | 'green' | 'amber'
-  size?: 'sm' | 'md'
-  className?: string
-}
-
-export function Badge({ children, variant = 'neutral', size = 'sm', className = '' }: BadgeProps) {
+export function Badge({ children, variant = 'neutral', size = 'sm', className = '' }) {
   const sizeStyles = {
     sm: 'text-[11px] px-2 py-0.5',
     md: 'text-xs px-2.5 py-1',

@@ -1,33 +1,24 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component } from 'react'
 
-export interface ErrorBoundaryProps {
-  children: ReactNode
-}
-
-export interface ErrorBoundaryState {
-  hasError: boolean
-  error: Error | null
-}
-
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public override state: ErrorBoundaryState = {
+export class ErrorBoundary extends Component {
+  state = {
     hasError: false,
     error: null,
   }
 
-  public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error) {
     return { hasError: true, error }
   }
 
-  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error, errorInfo) {
     console.error('Uncaught error in Compressa:', error, errorInfo)
   }
 
-  private handleReload = () => {
+  handleReload = () => {
     window.location.reload()
   }
 
-  public override render() {
+  render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6">

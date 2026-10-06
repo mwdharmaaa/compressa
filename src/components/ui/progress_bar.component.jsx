@@ -1,10 +1,4 @@
-export interface ProgressBarProps {
-  percentage: number
-  showLabel?: boolean
-  className?: string
-}
-
-export function ProgressBar({ percentage, showLabel = false, className = '' }: ProgressBarProps) {
+export function ProgressBar({ percentage, showLabel = false, className = '' }) {
   const clamped = Math.max(0, Math.min(100, percentage))
 
   return (

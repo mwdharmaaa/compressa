@@ -1,16 +1,3 @@
-export interface SliderProps {
-  label: string
-  value: number
-  onChange: (value: number) => void
-  min: number
-  max: number
-  step?: number
-  unit?: string
-  displayValue?: string
-  description?: string
-  disabled?: boolean
-}
-
 export function Slider({
   label,
   value,
@@ -22,7 +9,7 @@ export function Slider({
   displayValue,
   description,
   disabled = false,
-}: SliderProps) {
+}) {
   const percentage = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100))
 
   return (

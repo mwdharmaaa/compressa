@@ -5,7 +5,7 @@ import { Download, Check, Share, X, Monitor, Smartphone } from 'lucide-react'
 export function InstallAppButton() {
   const { hasPrompt, isInstalled, platform, promptInstall } = usePwaInstall()
   const [showModal, setShowModal] = useState(false)
-  const [selectedTab, setSelectedTab] = useState<'desktop' | 'android' | 'ios'>(platform)
+  const [selectedTab, setSelectedTab] = useState(platform)
 
   if (isInstalled) {
     return (
@@ -53,7 +53,7 @@ export function InstallAppButton() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-850 cursor-pointer transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-855 cursor-pointer transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -129,7 +129,7 @@ export function InstallAppButton() {
                   <div>
                     <span className="font-semibold text-zinc-200">Or Browser Menu:</span>
                     <p className="text-[11px] text-zinc-400 mt-0.5">
-                      Click the three dots (⋮) &rarr; select <strong className="text-zinc-200">Install Compressa</strong> or <strong className="text-zinc-200">Save and share &gt; Create Shortcut</strong> (check &quot;Open as window&quot;).
+                      Click the three dots (&vellip;) &rarr; select <strong className="text-zinc-200">Install Compressa</strong> or <strong className="text-zinc-200">Save and share &gt; Create Shortcut</strong> (check &quot;Open as window&quot;).
                     </p>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export function InstallAppButton() {
                   </span>
                   <div>
                     <span className="font-semibold text-zinc-200">Open Browser Menu:</span>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">Tap the three vertical dots (⋮) at the top-right in Chrome.</p>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">Tap the three vertical dots (&vellip;) at the top-right in Chrome.</p>
                   </div>
                 </div>
 
