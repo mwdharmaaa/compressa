@@ -1,18 +1,8 @@
 import JSZip from 'jszip'
-import type { VideoFileItem } from '@/core/types/video.types'
 import { formatFileSize } from '@/core/utils/file_size_formatter'
 import { Button } from '@/components/ui/button.component'
 import { Badge } from '@/components/ui/badge.component'
 import { Trash2, Archive, Play, CheckCircle } from 'lucide-react'
-
-export interface BatchQueueProps {
-  items: VideoFileItem[]
-  activeId: string | null
-  onSelectItem: (id: string) => void
-  onRemoveItem: (id: string) => void
-  onProcessAll: () => void
-  isProcessing: boolean
-}
 
 export function BatchQueue({
   items,
@@ -21,7 +11,7 @@ export function BatchQueue({
   onRemoveItem,
   onProcessAll,
   isProcessing,
-}: BatchQueueProps) {
+}) {
   const completedCount = items.filter((i) => i.status === 'completed' && i.resultBlob).length
 
   const handleDownloadAllZip = async () => {
@@ -111,7 +101,7 @@ export function BatchQueue({
                   <p className="text-xs font-medium text-zinc-200 truncate">{item.file.name}</p>
                   <p className="text-[10px] text-zinc-400">
                     {formatFileSize(item.file.size)}
-                    {item.resultSize && ` → ${formatFileSize(item.resultSize)}`}
+                    {item.resultSize && ` \u2192 ${formatFileSize(item.resultSize)}`}
                   </p>
                 </div>
               </div>

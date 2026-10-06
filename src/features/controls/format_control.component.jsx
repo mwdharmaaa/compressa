@@ -1,17 +1,10 @@
-import type { OutputFormat } from '@/core/types/compression.types'
 import { ShieldCheck } from 'lucide-react'
-
-export interface FormatControlProps {
-  format: OutputFormat
-  supportsMp4: boolean
-  onChangeFormat: (format: OutputFormat) => void
-}
 
 export function FormatControl({
   format,
   supportsMp4,
   onChangeFormat,
-}: FormatControlProps) {
+}) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div className="flex flex-col gap-2">

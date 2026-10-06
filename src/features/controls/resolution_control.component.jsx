@@ -1,14 +1,4 @@
-import type { ResolutionPreset } from '@/core/types/compression.types'
 import { calculateScaledResolution } from '@/core/utils/resolution_calculator'
-
-export interface ResolutionControlProps {
-  originalWidth: number
-  originalHeight: number
-  preset: ResolutionPreset
-  customScale: number
-  onChangePreset: (preset: ResolutionPreset) => void
-  onChangeCustomScale: (scale: number) => void
-}
 
 export function ResolutionControl({
   originalWidth,
@@ -17,8 +7,8 @@ export function ResolutionControl({
   customScale,
   onChangePreset,
   onChangeCustomScale,
-}: ResolutionControlProps) {
-  const options: { id: ResolutionPreset; label: string }[] = [
+}) {
+  const options = [
     { id: 'original', label: 'Original' },
     { id: '1080p', label: '1080p' },
     { id: '720p', label: '720p' },

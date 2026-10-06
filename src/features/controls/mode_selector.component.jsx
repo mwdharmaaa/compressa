@@ -1,13 +1,7 @@
-import type { CompressionMode } from '@/core/types/compression.types'
 import { Monitor, Target, Sliders, Cpu } from 'lucide-react'
 
-export interface ModeSelectorProps {
-  mode: CompressionMode
-  onChange: (mode: CompressionMode) => void
-}
-
-export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
-  const modes: { id: CompressionMode; label: string; icon: typeof Monitor; desc: string }[] = [
+export function ModeSelector({ mode, onChange }) {
+  const modes = [
     {
       id: 'resolution',
       label: 'By Resolution',

@@ -1,16 +1,9 @@
-import type { CompressionProgress } from '@/core/types/compression.types'
 import { ProgressBar } from '@/components/ui/progress_bar.component'
 import { Button } from '@/components/ui/button.component'
 import { formatDuration } from '@/core/utils/time_formatter'
 import { Loader2, XCircle } from 'lucide-react'
 
-export interface ProgressCardProps {
-  progress: CompressionProgress | null
-  fileName: string
-  onCancel: () => void
-}
-
-export function ProgressCard({ progress, fileName, onCancel }: ProgressCardProps) {
+export function ProgressCard({ progress, fileName, onCancel }) {
   const percentage = progress?.percentage ?? 0
   const processedSec = progress?.processedSeconds ?? 0
   const totalSec = progress?.totalSeconds ?? 1

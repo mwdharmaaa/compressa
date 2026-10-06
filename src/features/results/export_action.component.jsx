@@ -1,15 +1,8 @@
 import confetti from 'canvas-confetti'
 import { Button } from '@/components/ui/button.component'
 import { Download, RotateCcw } from 'lucide-react'
-import type { CompressionResult } from '@/core/types/compression.types'
 
-export interface ExportActionProps {
-  originalFileName: string
-  result: CompressionResult
-  onReset: () => void
-}
-
-export function ExportAction({ originalFileName, result, onReset }: ExportActionProps) {
+export function ExportAction({ originalFileName, result, onReset }) {
   const handleDownload = () => {
     try {
       confetti({

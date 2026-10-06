@@ -1,9 +1,4 @@
-export interface FpsControlProps {
-  targetFps: number
-  onChange: (fps: number) => void
-}
-
-export function FpsControl({ targetFps, onChange }: FpsControlProps) {
+export function FpsControl({ targetFps, onChange }) {
   const options = [
     { value: 0, label: 'Auto' },
     { value: 60, label: '60 FPS' },

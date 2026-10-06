@@ -2,24 +2,15 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { Tabs } from '@/components/ui/tabs.component'
 import { Eye } from 'lucide-react'
 
-export interface VideoComparisonProps {
-  originalFile: File
-  compressedUrl: string
-  compressedResolution: { width: number; height: number }
-  originalResolution: { width: number; height: number }
-}
-
-type ViewMode = 'compressed' | 'original' | 'side-by-side'
-
 export function VideoComparison({
   originalFile,
   compressedUrl,
   compressedResolution,
   originalResolution,
-}: VideoComparisonProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('compressed')
-  const compVideoRef = useRef<HTMLVideoElement>(null)
-  const origVideoRef = useRef<HTMLVideoElement>(null)
+}) {
+  const [viewMode, setViewMode] = useState('compressed')
+  const compVideoRef = useRef(null)
+  const origVideoRef = useRef(null)
 
   const origUrl = useMemo(() => URL.createObjectURL(originalFile), [originalFile])
 
@@ -29,7 +20,7 @@ export function VideoComparison({
     }
   }, [origUrl])
 
-  const tabItems: { id: ViewMode; label: string }[] = [
+  const tabItems = [
     { id: 'compressed', label: 'Compressed Output' },
     { id: 'original', label: 'Original Source' },
     { id: 'side-by-side', label: 'Side-by-Side' },

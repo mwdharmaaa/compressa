@@ -1,13 +1,6 @@
-import type { TargetSizePreset } from '@/core/types/preset.types'
 import { Badge } from '@/components/ui/badge.component'
 
-export interface PresetCardProps {
-  preset: TargetSizePreset
-  isSelected: boolean
-  onSelect: (preset: TargetSizePreset) => void
-}
-
-export function PresetCard({ preset, isSelected, onSelect }: PresetCardProps) {
+export function PresetCard({ preset, isSelected, onSelect }) {
   return (
     <button
       type="button"

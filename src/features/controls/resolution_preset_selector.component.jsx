@@ -1,17 +1,5 @@
-import type { ResolutionPreset } from '@/core/types/compression.types'
 import { getResolutionEstimates } from '@/core/utils/bitrate_calculator'
 import { Check, Sparkles } from 'lucide-react'
-
-export interface ResolutionPresetSelectorProps {
-  originalWidth: number
-  originalHeight: number
-  duration: number
-  originalSize: number
-  preset: ResolutionPreset
-  customScale: number
-  onSelectPreset: (preset: ResolutionPreset) => void
-  onChangeCustomScale: (scale: number) => void
-}
 
 export function ResolutionPresetSelector({
   originalWidth,
@@ -22,7 +10,7 @@ export function ResolutionPresetSelector({
   customScale,
   onSelectPreset,
   onChangeCustomScale,
-}: ResolutionPresetSelectorProps) {
+}) {
   const estimates = getResolutionEstimates(originalWidth, originalHeight, duration, originalSize)
 
   return (

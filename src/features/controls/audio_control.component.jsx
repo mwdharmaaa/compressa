@@ -1,18 +1,10 @@
-import type { AudioOption } from '@/core/types/compression.types'
 import { Volume2, VolumeX, ShieldCheck } from 'lucide-react'
-
-export interface AudioControlProps {
-  option: AudioOption
-  bitrateKbps?: number
-  onChangeOption: (opt: AudioOption) => void
-  onChangeBitrate?: (bitrate: number) => void
-}
 
 export function AudioControl({
   option,
   onChangeOption,
-}: AudioControlProps) {
-  const options: { id: AudioOption; label: string; icon: typeof Volume2; desc: string }[] = [
+}) {
+  const options = [
     {
       id: 'keep',
       label: 'Original (Lossless)',

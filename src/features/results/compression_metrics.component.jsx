@@ -1,12 +1,7 @@
-import type { CompressionResult } from '@/core/types/compression.types'
 import { formatFileSize } from '@/core/utils/file_size_formatter'
 import { ArrowDownRight, HardDrive, CheckCircle2 } from 'lucide-react'
 
-export interface CompressionMetricsProps {
-  result: CompressionResult
-}
-
-export function CompressionMetrics({ result }: CompressionMetricsProps) {
+export function CompressionMetrics({ result }) {
   const percentReduction = Number(
     (((result.originalSize - result.compressedSize) / result.originalSize) * 100).toFixed(1)
   )
