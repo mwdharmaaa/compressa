@@ -31,7 +31,7 @@ Compressa is a modern, privacy-first web application designed to compress and op
 
 ## Tech Stack & Architecture
 
-- **Frontend**: React 19, TypeScript 6, Vite 8, Tailwind CSS v4
+- **Frontend**: React 19, Modern JavaScript (ESM), Vite 8, Tailwind CSS v4
 - **Iconography**: Lucide React (vector SVG)
 - **Archive & Export**: JSZip, Canvas Confetti
 - **Testing & Quality**: Vitest, Oxlint
