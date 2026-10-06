@@ -1,12 +1,4 @@
-export interface AudioRoutingResult {
-  audioTrack: MediaStreamTrack | null
-  cleanup: () => void
-}
-
-export function setupAudioRouting(
-  videoElement: HTMLVideoElement,
-  isMuted: boolean
-): AudioRoutingResult {
+export function setupAudioRouting(videoElement, isMuted) {
   if (isMuted) {
     return {
       audioTrack: null,
@@ -14,12 +6,9 @@ export function setupAudioRouting(
     }
   }
 
-  // Try native captureStream on HTMLVideoElement first to avoid Web Audio buffer clicks
+  // Try native captureStream on HTMLVideoElement first
   try {
-    const videoWithCapture = videoElement as HTMLVideoElement & {
-      captureStream?: () => MediaStream
-      mozCaptureStream?: () => MediaStream
-    }
+    const videoWithCapture = videoElement
     const nativeStream = videoWithCapture.captureStream?.() ?? videoWithCapture.mozCaptureStream?.()
     const nativeAudioTrack = nativeStream?.getAudioTracks()[0]
     if (nativeAudioTrack) {
@@ -39,7 +28,7 @@ export function setupAudioRouting(
   }
 
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
     if (!AudioContextClass) {
       return { audioTrack: null, cleanup: () => {} }
     }
@@ -51,7 +40,7 @@ export function setupAudioRouting(
     const sourceNode = audioCtx.createMediaElementSource(videoElement)
     const destinationNode = audioCtx.createMediaStreamDestination()
 
-    // Route to destination stream, but NOT to audioCtx.destination (keeps it quiet during compression)
+    // Route to destination stream, but NOT to audioCtx.destination
     sourceNode.connect(destinationNode)
 
     const audioTrack = destinationNode.stream.getAudioTracks()[0] ?? null

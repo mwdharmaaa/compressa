@@ -1,9 +1,7 @@
-import type { CompressionOptions, CompressionProgress, CompressionResult } from '@/core/types/compression.types'
-import type { VideoMetadata } from '@/core/types/video.types'
 import { compressVideoWithWebCodecs } from '@/core/engine/webcodecs_compressor'
 import { compressVideoWithMediaRecorder } from '@/core/engine/mediarecorder_compressor'
 
-export function isWebCodecsSupported(): boolean {
+export function isWebCodecsSupported() {
   return (
     typeof window !== 'undefined' &&
     'VideoEncoder' in window &&
@@ -12,12 +10,12 @@ export function isWebCodecsSupported(): boolean {
 }
 
 export async function compressVideo(
-  file: File,
-  metadata: VideoMetadata,
-  options: CompressionOptions,
-  onProgress: (progress: CompressionProgress) => void,
-  signal?: AbortSignal
-): Promise<CompressionResult> {
+  file,
+  metadata,
+  options,
+  onProgress,
+  signal
+) {
   if (isWebCodecsSupported()) {
     try {
       return await compressVideoWithWebCodecs(file, metadata, options, onProgress, signal)

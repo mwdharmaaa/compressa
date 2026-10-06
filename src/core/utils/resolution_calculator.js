@@ -1,22 +1,9 @@
-import type { ResolutionPreset } from '@/core/types/compression.types'
-
-export interface ScaledDimensions {
-  width: number
-  height: number
-  scaleFactor: number
-}
-
-function makeEven(val: number): number {
+function makeEven(val) {
   const rounded = Math.round(val)
   return rounded % 2 === 0 ? rounded : rounded - 1
 }
 
-export function calculateScaledResolution(
-  origWidth: number,
-  origHeight: number,
-  preset: ResolutionPreset,
-  customScale: number
-): ScaledDimensions {
+export function calculateScaledResolution(origWidth, origHeight, preset, customScale) {
   if (origWidth <= 0 || origHeight <= 0) {
     return { width: 1280, height: 720, scaleFactor: 1 }
   }
@@ -24,7 +11,7 @@ export function calculateScaledResolution(
   const aspectRatio = origWidth / origHeight
   const isLandscape = origWidth >= origHeight
 
-  let targetDimension: number | null = null
+  let targetDimension = null
 
   switch (preset) {
     case '1080p':

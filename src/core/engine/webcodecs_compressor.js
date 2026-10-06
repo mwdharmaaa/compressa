@@ -11,19 +11,17 @@ import {
   canEncodeVideo,
   ConversionCanceledError,
 } from 'mediabunny'
-import type { CompressionOptions, CompressionProgress, CompressionResult, OutputFormat } from '@/core/types/compression.types'
-import type { VideoMetadata } from '@/core/types/video.types'
 import { calculateScaledResolution } from '@/core/utils/resolution_calculator'
 import { calculateBitrates } from '@/core/utils/bitrate_calculator'
 import { calculateSavings } from '@/core/utils/file_size_formatter'
 
 export async function compressVideoWithWebCodecs(
-  file: File,
-  metadata: VideoMetadata,
-  options: CompressionOptions,
-  onProgress: (progress: CompressionProgress) => void,
-  signal?: AbortSignal
-): Promise<CompressionResult> {
+  file,
+  metadata,
+  options,
+  onProgress,
+  signal
+) {
   if (signal?.aborted) {
     throw new DOMException('Compression aborted', 'AbortError')
   }
@@ -61,20 +59,17 @@ export async function compressVideoWithWebCodecs(
   const primaryAudio = await input.getPrimaryAudioTrack()
   const hasAudio = primaryAudio !== null
 
-  let outputFormat: OutputFormat = options.format
+  let outputFormat = options.format
 
   if (hasAudio && options.audioOption === 'keep') {
     const sourceAudioCodec = await primaryAudio.getCodec()
-    // Align container format with source audio codec so packets can be copied 1:1 losslessly without re-encoding
     if (sourceAudioCodec === 'opus') {
       outputFormat = options.format === 'mp4' ? 'mp4' : 'webm'
     } else {
-      // AAC, MP3, AC3, FLAC require MP4 container to preserve packets losslessly
       outputFormat = 'mp4'
     }
   }
 
-  // Only fall back to WebM if audio is muted or Opus-based, because WebM strictly rejects AAC audio
   if (outputFormat === 'mp4' && (!hasAudio || options.audioOption === 'mute')) {
     const supportsAvc = await canEncodeVideo('avc', {
       width: scaled.width,
@@ -92,7 +87,6 @@ export async function compressVideoWithWebCodecs(
     target,
   })
 
-  // Audio stream is 100% untouched passthrough unless explicitly muted by user
   const audioConfig = options.audioOption === 'mute' || !hasAudio ? { discard: true } : undefined
 
   const conversion = await Conversion.init({
@@ -135,7 +129,7 @@ export async function compressVideoWithWebCodecs(
 
   const startTimeReal = performance.now()
 
-  conversion.onProgress = (progress: number, processedTime: number) => {
+  conversion.onProgress = (progress, processedTime) => {
     const percentage = Math.min(99, Number((progress * 100).toFixed(1)))
     const elapsed = (performance.now() - startTimeReal) / 1000
     const estimatedTotal = progress > 0 ? elapsed / progress : 0

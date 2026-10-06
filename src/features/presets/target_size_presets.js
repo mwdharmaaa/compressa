@@ -1,6 +1,4 @@
-import type { TargetSizePreset } from '@/core/types/preset.types'
-
-export function getTargetSizePresets(originalSizeBytes?: number): TargetSizePreset[] {
+﻿export function getTargetSizePresets(originalSizeBytes) {
   if (!originalSizeBytes || originalSizeBytes <= 0) {
     return [
       {
@@ -52,7 +50,7 @@ export function getTargetSizePresets(originalSizeBytes?: number): TargetSizePres
   const balancedMb = Math.max(1, Math.round(originalMb * 0.50 * 10) / 10)
   const compactMb = Math.max(0.5, Math.round(originalMb * 0.30 * 10) / 10)
 
-  const presets: TargetSizePreset[] = [
+  const presets = [
     {
       id: 'preset_balanced',
       label: 'Balanced (~50%)',

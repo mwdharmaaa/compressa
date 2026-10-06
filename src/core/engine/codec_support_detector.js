@@ -1,13 +1,3 @@
-import type { OutputFormat } from '@/core/types/compression.types'
-
-export interface SupportedCodecs {
-  supportsMp4: boolean
-  supportsWebm: boolean
-  recommendedFormat: OutputFormat
-  mp4MimeType: string | null
-  webmMimeType: string | null
-}
-
 const MP4_CANDIDATES = [
   'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
   'video/mp4;codecs=avc1',
@@ -21,7 +11,7 @@ const WEBM_CANDIDATES = [
   'video/webm',
 ]
 
-export function detectSupportedCodecs(): SupportedCodecs {
+export function detectSupportedCodecs() {
   const hasWebCodecs =
     typeof window !== 'undefined' &&
     'VideoEncoder' in window &&
@@ -47,7 +37,7 @@ export function detectSupportedCodecs(): SupportedCodecs {
     }
   }
 
-  let mp4MimeType: string | null = null
+  let mp4MimeType = null
   for (const candidate of MP4_CANDIDATES) {
     try {
       if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(candidate)) {
@@ -59,7 +49,7 @@ export function detectSupportedCodecs(): SupportedCodecs {
     }
   }
 
-  let webmMimeType: string | null = null
+  let webmMimeType = null
   for (const candidate of WEBM_CANDIDATES) {
     try {
       if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(candidate)) {
@@ -73,7 +63,7 @@ export function detectSupportedCodecs(): SupportedCodecs {
 
   const supportsMp4 = mp4MimeType !== null
   const supportsWebm = webmMimeType !== null
-  const recommendedFormat: OutputFormat = supportsMp4 ? 'mp4' : 'webm'
+  const recommendedFormat = supportsMp4 ? 'mp4' : 'webm'
 
   return {
     supportsMp4,

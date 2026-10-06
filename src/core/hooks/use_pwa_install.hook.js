@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react'
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
-}
-
-function checkIsStandalone(): boolean {
+function checkIsStandalone() {
   if (typeof window === 'undefined') return false
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    Boolean((navigator as unknown as { standalone?: boolean }).standalone)
+    Boolean(navigator.standalone)
   )
 }
 
-function checkPlatform(): 'ios' | 'android' | 'desktop' {
+function checkPlatform() {
   if (typeof window === 'undefined') return 'desktop'
   const ua = window.navigator.userAgent.toLowerCase()
   if (/iphone|ipad|ipod/.test(ua)) return 'ios'
@@ -22,14 +17,14 @@ function checkPlatform(): 'ios' | 'android' | 'desktop' {
 }
 
 export function usePwaInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalled, setIsInstalled] = useState<boolean>(checkIsStandalone)
-  const [platform] = useState<'ios' | 'android' | 'desktop'>(checkPlatform)
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [isInstalled, setIsInstalled] = useState(checkIsStandalone)
+  const [platform] = useState(checkPlatform)
 
   useEffect(() => {
-    const handleBeforeInstall = (e: Event) => {
+    const handleBeforeInstall = (e) => {
       e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
+      setDeferredPrompt(e)
     }
 
     const handleAppInstalled = () => {
@@ -46,7 +41,7 @@ export function usePwaInstall() {
     }
   }, [])
 
-  const promptInstall = async (): Promise<boolean> => {
+  const promptInstall = async () => {
     if (!deferredPrompt) {
       return false
     }

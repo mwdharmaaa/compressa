@@ -1,6 +1,4 @@
-import type { VideoMetadata } from '@/core/types/video.types'
-
-export async function extractVideoMetadata(file: File): Promise<VideoMetadata> {
+export async function extractVideoMetadata(file) {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
     const objectUrl = URL.createObjectURL(file)

@@ -1,46 +1,9 @@
-import type { AudioOption, CompressionMode, ResolutionPreset } from '@/core/types/compression.types'
 import { calculateScaledResolution } from '@/core/utils/resolution_calculator'
-
-export interface BitrateCalculationInput {
-  mode: CompressionMode
-  durationSeconds: number
-  targetSizeMb?: number
-  qualityCrf?: number
-  manualVideoBitrateKbps?: number
-  audioOption: AudioOption
-  audioBitrateKbps?: number
-  targetWidth?: number
-  targetHeight?: number
-  targetFps?: number
-  resolutionPreset?: ResolutionPreset
-  originalSizeBytes?: number
-  originalWidth?: number
-  originalHeight?: number
-  customScale?: number
-}
-
-export interface BitrateCalculationResult {
-  videoBitrateBps: number
-  audioBitrateBps: number
-  totalBitrateBps: number
-  estimatedSizeMb: number
-}
-
-export interface ResolutionEstimateItem {
-  preset: ResolutionPreset
-  label: string
-  sublabel: string
-  badge?: string
-  width: number
-  height: number
-  estimatedSizeMb: number
-  percentSavings: number
-}
 
 const MIN_VIDEO_BITRATE_BPS = 100_000 // 100 kbps minimum
 const MAX_VIDEO_BITRATE_BPS = 25_000_000 // 25 Mbps maximum
 
-export function calculateBitrates(input: BitrateCalculationInput): BitrateCalculationResult {
+export function calculateBitrates(input) {
   const duration = Math.max(0.5, input.durationSeconds)
 
   const audioBitrateBps =
@@ -49,7 +12,7 @@ export function calculateBitrates(input: BitrateCalculationInput): BitrateCalcul
       : Math.max(96_000, (input.audioBitrateKbps || 128) * 1000)
 
   // Determine original bitrate ceiling if original size is provided
-  let originalVideoBitrateBps: number | null = null
+  let originalVideoBitrateBps = null
   let maxAllowedVideoBitrate = MAX_VIDEO_BITRATE_BPS
 
   if (input.originalSizeBytes && input.originalSizeBytes > 0) {
@@ -142,15 +105,8 @@ export function calculateBitrates(input: BitrateCalculationInput): BitrateCalcul
   }
 }
 
-export function getResolutionEstimates(
-  originalWidth: number,
-  originalHeight: number,
-  durationSeconds: number,
-  originalSizeBytes: number,
-  audioOption: AudioOption = 'keep',
-  audioBitrateKbps = 128
-): ResolutionEstimateItem[] {
-  const presets: { id: ResolutionPreset; label: string; sublabel: string; badge?: string }[] = [
+export function getResolutionEstimates(originalWidth, originalHeight, durationSeconds, originalSizeBytes, audioOption = 'keep', audioBitrateKbps = 128) {
+  const presets = [
     { id: 'original', label: 'Original', sublabel: 'Smart Compression', badge: 'Source' },
     { id: '1080p', label: '1080p Full HD', sublabel: 'Crisp Fidelity', badge: 'Crisp' },
     { id: '720p', label: '720p HD', sublabel: 'Balanced Speed & Quality', badge: 'Popular' },

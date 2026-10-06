@@ -1,5 +1,3 @@
-import type { CompressionOptions, CompressionProgress, CompressionResult } from '@/core/types/compression.types'
-import type { VideoMetadata } from '@/core/types/video.types'
 import { calculateScaledResolution } from '@/core/utils/resolution_calculator'
 import { calculateBitrates } from '@/core/utils/bitrate_calculator'
 import { calculateSavings } from '@/core/utils/file_size_formatter'
@@ -7,12 +5,12 @@ import { detectSupportedCodecs } from '@/core/engine/codec_support_detector'
 import { setupAudioRouting } from '@/core/engine/audio_routing'
 
 export function compressVideoWithMediaRecorder(
-  file: File,
-  metadata: VideoMetadata,
-  options: CompressionOptions,
-  onProgress: (progress: CompressionProgress) => void,
-  signal?: AbortSignal
-): Promise<CompressionResult> {
+  file,
+  metadata,
+  options,
+  onProgress,
+  signal
+) {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) {
       return reject(new DOMException('Compression aborted', 'AbortError'))
@@ -76,10 +74,10 @@ export function compressVideoWithMediaRecorder(
     canvas.height = scaled.height
     const ctx = canvas.getContext('2d', { alpha: false })
 
-    let recorder: MediaRecorder | null = null
-    let animFrameId: number | null = null
-    let audioCleanup: () => void = () => {}
-    const chunks: Blob[] = []
+    let recorder = null
+    let animFrameId = null
+    let audioCleanup = () => {}
+    const chunks = []
     const startTimeReal = performance.now()
 
     const tearDown = () => {

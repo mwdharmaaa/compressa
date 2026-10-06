@@ -1,4 +1,4 @@
-export function formatFileSize(bytes: number): string {
+﻿export function formatFileSize(bytes) {
   if (bytes <= 0 || Number.isNaN(bytes)) return '0 B'
   const units = ['B', 'KB', 'MB', 'GB']
   const digitGroups = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
@@ -6,10 +6,7 @@ export function formatFileSize(bytes: number): string {
   return `${value.toFixed(value >= 100 || digitGroups === 0 ? 0 : 1)} ${units[digitGroups]}`
 }
 
-export function calculateSavings(originalBytes: number, compressedBytes: number): {
-  savedBytes: number
-  percentReduction: number
-} {
+export function calculateSavings(originalBytes, compressedBytes) {
   if (originalBytes <= 0) {
     return { savedBytes: 0, percentReduction: 0 }
   }
